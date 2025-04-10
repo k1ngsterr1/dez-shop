@@ -11,7 +11,7 @@ import {
 export function Footer() {
   return (
     <footer className="border-t bg-muted/40">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container w-full mx-auto px-4 py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h3 className="mb-4 text-lg font-bold">О компании</h3>
@@ -100,22 +100,6 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/delivery"
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  Доставка
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/payment"
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  Оплата
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/articles"
                   className="text-muted-foreground hover:text-primary"
                 >
@@ -139,8 +123,12 @@ export function Footer() {
               <li className="flex items-start">
                 <Phone className="mr-2 mt-0.5 h-4 w-4 text-primary" />
                 <div>
-                  <div>+7(727) 248-63-37</div>
-                  <div>+7(727) 248-02-01</div>
+                  <a
+                    href="tel:+77000246777"
+                    className="text-sm hover:text-primary transition-colors"
+                  >
+                    +7(700) 024-67-77
+                  </a>
                 </div>
               </li>
               <li className="flex items-center">

@@ -1,15 +1,16 @@
 import { ProductSlider } from "@/features/product-slider/product-slider";
 import { ArticlesList } from "@/widgets/home-page/articles-list";
+import { DisinfectantCalculator } from "@/widgets/home-page/calculator";
 import { Categories } from "@/widgets/home-page/categories";
 import { HeroSection } from "@/widgets/home-page/hero-section";
-import { Partners } from "@/widgets/home-page/partners-block";
 import { ProductsBlock } from "@/widgets/home-page/products-block";
 
 export default function Home() {
   return (
-    <div className="container mx-auto px-4 py-8 pt-6">
+    <div className="container w-full mx-auto py-8 pt-6">
       <HeroSection />
-      <Partners />
+      {/* <Partners /> */}
+      <DisinfectantCalculator />
       <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-4">
         <div className="lg:col-span-1">
           <Categories />
