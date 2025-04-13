@@ -100,14 +100,6 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/articles"
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  Статьи
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/faq"
                   className="text-muted-foreground hover:text-primary"
                 >

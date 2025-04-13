@@ -5,6 +5,8 @@ import "./globals.css";
 import { Header } from "@/features/header/header";
 import { Footer } from "@/features/footer/footer";
 import { ThemeProvider } from "next-themes";
+import { ContactForm } from "@/widgets/contacts-page/contacts-form";
+import { ContactFormPopup } from "@/entities/contact-form/ui/contact-form-popup";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
@@ -31,6 +33,7 @@ export default function RootLayout({
           <div className="flex min-h-screen flex-col">
             <Header />
             <main className="flex-1">{children}</main>
+            <ContactFormPopup />
             <Footer />
           </div>
         </ThemeProvider>

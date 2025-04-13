@@ -125,7 +125,7 @@ export function Header() {
                   <Input
                     type="search"
                     placeholder="Поиск по сайту"
-                    className="w-full md:w-64 focus-visible:ring-primary"
+                    className="w-full md:w-64 "
                     autoFocus
                   />
                   <Button

@@ -165,36 +165,6 @@ export function AboutBlock() {
         </div>
       </div>
 
-      {/* Team Section */}
-      <div className="mb-16">
-        <div className="mb-8 text-center">
-          <h2 className="mb-2 text-2xl font-bold">Наша команда</h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground">
-            Профессионалы, которые делают ProfDez лидером в своей отрасли
-          </p>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="text-center">
-              <div className="mx-auto mb-4 aspect-square w-40 overflow-hidden rounded-full">
-                <Image
-                  src={`/placeholder.svg?height=160&width=160&text=Фото`}
-                  alt={`Член команды ${i}`}
-                  width={160}
-                  height={160}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h3 className="mb-1 text-lg font-medium">Имя Фамилия</h3>
-              <p className="mb-2 text-sm text-primary">Должность</p>
-              <p className="text-xs text-muted-foreground">
-                Краткое описание опыта работы и профессиональных достижений
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* CTA Section */}
       <div className="rounded-lg bg-primary/10 p-8 text-center">
         <h2 className="mb-4 text-2xl font-bold">Станьте нашим партнером</h2>

@@ -9,7 +9,6 @@ export default function Home() {
   return (
     <div className="container w-full mx-auto py-8 pt-6">
       <HeroSection />
-      {/* <Partners /> */}
       <DisinfectantCalculator />
       <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-4">
         <div className="lg:col-span-1">
@@ -17,10 +16,6 @@ export default function Home() {
         </div>
         <div className="lg:col-span-3">
           <ProductSlider />
-          <div className="mt-12">
-            <h2 className="mb-6 text-2xl font-bold text-primary">Статьи</h2>
-            <ArticlesList />
-          </div>
         </div>
       </div>
       <ProductsBlock />
