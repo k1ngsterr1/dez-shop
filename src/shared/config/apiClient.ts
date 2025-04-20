@@ -1,11 +1,8 @@
 import axios from "axios";
-
+const BASE_URL = "http://localhost:6001";
 // Create an Axios instance with default configuration
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: BASE_URL,
 });
 
 // Add request interceptor for authentication if needed

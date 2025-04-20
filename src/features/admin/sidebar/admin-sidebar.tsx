@@ -97,7 +97,9 @@ const navigationItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
+    Products: true, // Open the Products menu by default
+  });
 
   const toggleMenu = (title: string) => {
     setOpenMenus((prev) => ({
@@ -111,7 +113,7 @@ export function AdminSidebar() {
   };
 
   return (
-    <Sidebar>
+    <Sidebar variant="sidebar" collapsible="icon">
       <SidebarHeader className="border-b">
         <div className="flex items-center gap-2 px-2 py-4">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
@@ -192,7 +194,7 @@ export function AdminSidebar() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src="/mystical-forest-spirit.png" alt="Avatar" />
+              <AvatarImage src="/vibrant-street-market.png" alt="Avatar" />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">

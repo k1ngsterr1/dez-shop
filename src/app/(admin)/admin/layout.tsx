@@ -1,7 +1,7 @@
 import type React from "react";
 import type { Metadata } from "next";
 import "./globals.css";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/features/admin/sidebar/admin-sidebar";
 
 export const metadata: Metadata = {
@@ -9,7 +9,6 @@ export const metadata: Metadata = {
   description: "Admin dashboard for managing your application",
 };
 
-// src/app/(admin)/layout.tsx
 export default function AdminLayout({
   children,
 }: {
@@ -19,11 +18,11 @@ export default function AdminLayout({
     <html lang="ru">
       <body>
         <SidebarProvider defaultOpen={true}>
-          <div className="flex h-screen">
+          <div className="flex min-h-screen w-full">
             <AdminSidebar />
-            <SidebarInset className="flex-1 overflow-auto">
-              <main className="h-full bg-muted/10">{children}</main>
-            </SidebarInset>
+            <div className="flex-1 w-0">
+              <main className="h-full p-6">{children}</main>
+            </div>
           </div>
         </SidebarProvider>
       </body>

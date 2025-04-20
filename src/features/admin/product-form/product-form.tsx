@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -29,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DialogFooter } from "@/components/ui/dialog";
+import type { ProductWithImages } from "@/entities/product/dto/product.dto";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = [
@@ -60,15 +60,7 @@ const productFormSchema = z.object({
 });
 
 // Define the type for form values
-export type ProductFormValues = z.infer<typeof productFormSchema>;
-
-// Define the type for the product with images
-export interface ProductWithImages extends ProductFormValues {
-  images: string[];
-  id?: number;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+type ProductFormValues = z.infer<typeof productFormSchema>;
 
 const defaultValues: ProductFormValues = {
   name: "",
@@ -83,16 +75,17 @@ interface ProductFormProps {
   onSubmit: (data: ProductWithImages) => void;
   initialData?: ProductWithImages;
   isEditing?: boolean;
+  isSubmitting?: boolean;
 }
 
 export function ProductForm({
   onSubmit,
   initialData,
   isEditing = false,
+  isSubmitting = false,
 }: ProductFormProps) {
   const [images, setImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize form with proper types
   const form = useForm<ProductFormValues>({
@@ -156,27 +149,50 @@ export function ProductForm({
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Update the handleFormSubmit function to only send FormData
   const handleFormSubmit = async (data: ProductFormValues) => {
-    if (imageUrls.length === 0) {
+    if (images.length === 0 && imageUrls.length === 0) {
       form.setError("root", {
         message: "Добавьте хотя бы одно изображение продукта",
       });
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // In a real app, you would upload images here
-      // For now, we'll just pass the URLs
+      // Create FormData to handle file uploads
+      const formData = new FormData();
+
+      // Add all form fields to FormData
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value.toString());
+      });
+
+      // Add image files to FormData
+      images.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      // When updating, we'll send the current image URLs as a JSON string
+      // This replaces the previous approach of adding each URL as a separate "existingImages" field
+      if (isEditing) {
+        // Filter out blob URLs (new images) and only include existing URLs from the server
+        const existingImageUrls = imageUrls.filter(
+          (url) => !url.startsWith("blob:")
+        );
+
+        // Add as a single JSON field instead of multiple fields
+        if (existingImageUrls.length > 0) {
+          formData.append("imageUrls", JSON.stringify(existingImageUrls));
+        }
+      }
+
+      // Pass only the FormData to the parent component
       await onSubmit({
-        ...data,
-        images: imageUrls,
+        formData,
+        name: data.name, // Add name for toast message in the parent component
       });
     } catch (error) {
       console.error("Error submitting form:", error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -297,7 +313,7 @@ export function ProductForm({
                       onClick={() => removeImage(index)}
                       className="absolute top-2 right-2 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4" />
                     </button>
                   </div>
                 ))}

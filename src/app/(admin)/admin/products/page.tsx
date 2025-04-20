@@ -34,146 +34,22 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  ProductForm,
-  type ProductWithImages,
-} from "@/features/admin/product-form/product-form";
-
-// Define the Product type
-interface Product extends ProductWithImages {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// This would be your actual hook in a real application
-const useGetProducts = () => {
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: 1,
-      name: "Смартфон XYZ Pro",
-      category: "electronics",
-      description: "Мощный смартфон с отличной камерой и производительностью.",
-      images: ["/modern-communication-hub.png"],
-      isInStock: true,
-      isPopular: true,
-      price: 49999.99,
-      createdAt: new Date("2023-05-15"),
-      updatedAt: new Date("2023-06-01"),
-    },
-    {
-      id: 2,
-      name: "Ноутбук UltraBook",
-      category: "electronics",
-      description: "Тонкий и легкий ноутбук для работы и развлечений.",
-      images: ["/modern-workspace.png"],
-      isInStock: true,
-      isPopular: false,
-      price: 89999.99,
-      createdAt: new Date("2023-04-10"),
-      updatedAt: new Date("2023-04-10"),
-    },
-    {
-      id: 3,
-      name: "Кроссовки SportRun",
-      category: "clothing",
-      description: "Удобные кроссовки для бега и повседневной носки.",
-      images: ["/diverse-sneaker-collection.png"],
-      isInStock: false,
-      isPopular: true,
-      price: 5999.99,
-      createdAt: new Date("2023-03-22"),
-      updatedAt: new Date("2023-03-25"),
-    },
-    {
-      id: 4,
-      name: "Кофемашина BaristaPro",
-      category: "home",
-      description:
-        "Автоматическая кофемашина для приготовления различных видов кофе.",
-      images: ["/stainless-steel-coffee-maker.png"],
-      isInStock: true,
-      isPopular: true,
-      price: 29999.99,
-      createdAt: new Date("2023-02-18"),
-      updatedAt: new Date("2023-02-20"),
-    },
-    {
-      id: 5,
-      name: "Фитнес-браслет ActiveLife",
-      category: "electronics",
-      description: "Умный браслет для отслеживания активности и здоровья.",
-      images: ["/wrist-activity-monitor.png"],
-      isInStock: true,
-      isPopular: false,
-      price: 3999.99,
-      createdAt: new Date("2023-01-05"),
-      updatedAt: new Date("2023-01-10"),
-    },
-  ]);
-
-  const addProduct = (product: ProductWithImages) => {
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      const newProduct: Product = {
-        ...product,
-        id: Math.max(0, ...products.map((p) => p.id)) + 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setProducts([newProduct, ...products]);
-      setLoading(false);
-      toast({
-        title: "Продукт добавлен",
-        description: `Продукт "${product.name}" успешно добавлен.`,
-      });
-    }, 500);
-  };
-
-  const updateProduct = (id: number, updatedProduct: ProductWithImages) => {
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setProducts(
-        products.map((product) =>
-          product.id === id
-            ? { ...product, ...updatedProduct, updatedAt: new Date() }
-            : product
-        )
-      );
-      setLoading(false);
-      toast({
-        title: "Продукт обновлен",
-        description: `Продукт "${updatedProduct.name}" успешно обновлен.`,
-      });
-    }, 500);
-  };
-
-  const deleteProduct = (id: number) => {
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      const productToDelete = products.find((p) => p.id === id);
-      setProducts(products.filter((product) => product.id !== id));
-      setLoading(false);
-      if (productToDelete) {
-        toast({
-          title: "Продукт удален",
-          description: `Продукт "${productToDelete.name}" успешно удален.`,
-        });
-      }
-    }, 500);
-  };
-
-  return { products, loading, addProduct, updateProduct, deleteProduct };
-};
+import { ProductForm } from "@/features/admin/product-form/product-form";
+import { useProductsQuery } from "@/entities/product/hooks/query/use-get-products.query";
+import { useCreateProductMutation } from "@/entities/product/hooks/mutation/use-create-product.mutation";
+import { useUpdateProductMutation } from "@/entities/product/hooks/mutation/use-update-product.mutation";
+import { useDeleteProductMutation } from "@/entities/product/hooks/mutation/use-delete-product.mutation";
+import { Product, ProductWithImages } from "@/entities/product/dto/product.dto";
 
 export default function ProductsPage() {
-  const { products, loading, addProduct, updateProduct, deleteProduct } =
-    useGetProducts();
+  // Custom hooks
+  const { data: products = [], isLoading, refetch } = useProductsQuery();
+  const createProductMutation = useCreateProductMutation();
+  const updateProductMutation = useUpdateProductMutation();
+  const deleteProductMutation = useDeleteProductMutation();
+  const { toast } = useToast();
+
+  // Local state
   const [searchTerm, setSearchTerm] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -184,19 +60,62 @@ export default function ProductsPage() {
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddProduct = (productData: ProductWithImages) => {
-    addProduct(productData);
-    setAddDialogOpen(false);
+  const handleAddProduct = async (productData: ProductWithImages) => {
+    try {
+      await createProductMutation.mutate(productData);
+      toast({
+        title: "Продукт добавлен",
+        description: `Продукт "${productData.name}" успешно добавлен.`,
+      });
+      setAddDialogOpen(false);
+      refetch(); // Refresh the products list
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось добавить продукт",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleUpdateProduct = (productData: ProductWithImages) => {
+  const handleUpdateProduct = async (productData: any) => {
     if (currentProduct) {
-      updateProduct(currentProduct.id, productData);
-      setEditDialogOpen(false);
-      setCurrentProduct(null);
+      try {
+        await updateProductMutation.mutate(currentProduct.id, productData);
+        toast({
+          title: "Продукт обновлен",
+          description: `Продукт "${productData.name}" успешно обновлен.`,
+        });
+        setEditDialogOpen(false);
+        setCurrentProduct(null);
+        refetch(); // Refresh the products list
+      } catch (error) {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось обновить продукт",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleDeleteProduct = async (id: number) => {
+    try {
+      await deleteProductMutation.mutate(id);
+      toast({
+        title: "Продукт удален",
+        description: "Продукт успешно удален.",
+      });
+      refetch(); // Refresh the products list
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить продукт",
+        variant: "destructive",
+      });
     }
   };
 
@@ -216,8 +135,8 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="flex justify-center py-10">
-      <div className="max-w-5xl w-full">
+    <div className="w-full">
+      <div className="max-w-5xl w-full mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Продукты</h1>
@@ -240,7 +159,10 @@ export default function ProductsPage() {
                   Заполните форму ниже, чтобы добавить новый продукт в каталог.
                 </DialogDescription>
               </DialogHeader>
-              <ProductForm onSubmit={handleAddProduct} />
+              <ProductForm
+                onSubmit={handleAddProduct}
+                isSubmitting={createProductMutation.isLoading}
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -261,13 +183,13 @@ export default function ProductsPage() {
           </Button>
         </div>
 
-        {loading && (
+        {isLoading && (
           <div className="flex justify-center my-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
 
-        {!loading && filteredProducts.length === 0 ? (
+        {!isLoading && filteredProducts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
               Продукты не найдены. Попробуйте изменить параметры поиска или
@@ -357,7 +279,9 @@ export default function ProductsPage() {
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Отмена</AlertDialogCancel>
                                 <AlertDialogAction
-                                  onClick={() => deleteProduct(product.id)}
+                                  onClick={() =>
+                                    handleDeleteProduct(product.id)
+                                  }
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
                                   Удалить
@@ -389,6 +313,7 @@ export default function ProductsPage() {
                 onSubmit={handleUpdateProduct}
                 initialData={currentProduct}
                 isEditing={true}
+                isSubmitting={updateProductMutation.isLoading}
               />
             )}
           </DialogContent>

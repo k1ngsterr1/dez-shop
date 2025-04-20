@@ -1,12 +1,15 @@
 import { apiClient } from "@/shared/config/apiClient";
-import { UpdateProductDto } from "./dto/update-product.dto";
 
-export const updateProduct = async (id: number, data: UpdateProductDto) => {
+export const updateProduct = async (id: number, data: FormData) => {
   try {
-    const response = await apiClient.patch(`/product/${id}`, data);
+    const response = await apiClient.patch(`api/product/${id}`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   } catch (error) {
-    console.error("Error updating product:", error);
+    console.error(`Error updating product with ID ${id}:`, error);
     throw error;
   }
 };
