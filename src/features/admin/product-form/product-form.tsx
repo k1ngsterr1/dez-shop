@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { DialogFooter } from "@/components/ui/dialog";
 import type { ProductWithImages } from "@/entities/product/dto/product.dto";
+import { useCategoriesQuery } from "@/entities/category/hooks/query/use-get-categories.query";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = [
@@ -86,6 +87,7 @@ export function ProductForm({
 }: ProductFormProps) {
   const [images, setImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const { data: categories = [], isLoading, refetch } = useCategoriesQuery();
 
   // Initialize form with proper types
   const form = useForm<ProductFormValues>({
@@ -234,13 +236,11 @@ export function ProductForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="electronics">Электроника</SelectItem>
-                      <SelectItem value="clothing">Одежда</SelectItem>
-                      <SelectItem value="home">Товары для дома</SelectItem>
-                      <SelectItem value="beauty">Красота и здоровье</SelectItem>
-                      <SelectItem value="sports">Спорт и отдых</SelectItem>
-                      <SelectItem value="books">Книги</SelectItem>
-                      <SelectItem value="other">Другое</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
