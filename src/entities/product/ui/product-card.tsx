@@ -16,7 +16,7 @@ import React from "react";
 interface IProductCard {
   product: {
     id: number;
-    title: string;
+    name: string;
     price: number;
     image: string;
     category: string;
@@ -38,7 +38,7 @@ export const ProductCard: React.FC<IProductCard> = ({ product }) => {
         <div className="relative aspect-square overflow-hidden">
           <Image
             src={product.image || "/placeholder.svg"}
-            alt={product.title}
+            alt={product.name}
             fill
             className="object-cover transition-transform group-hover:scale-105"
           />
@@ -62,7 +62,7 @@ export const ProductCard: React.FC<IProductCard> = ({ product }) => {
       <CardHeader className="p-4 pb-0">
         <Link href={`/products/${product.id}`} className="hover:underline">
           <h3 className="line-clamp-2 min-h-[3rem] text-lg font-medium">
-            {product.title}
+            {product.name}
           </h3>
         </Link>
         <p className="text-xs text-muted-foreground">{product.category}</p>

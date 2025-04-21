@@ -1,90 +1,57 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/entities/product/ui/product-card";
-
-const products = [
-  {
-    id: 1,
-    title: "Дезинфицирующее средство Spell",
-    price: 3200,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Дезинфицирующие средства",
-    isNew: true,
-    isPopular: false,
-    inStock: true,
-  },
-  {
-    id: 2,
-    title: "Антисептик для рук Sanitelle",
-    price: 1500,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Антисептические средства",
-    isNew: false,
-    isPopular: true,
-    inStock: true,
-  },
-  {
-    id: 3,
-    title: "Моющее средство ProClean",
-    price: 2800,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Моющие средства",
-    isNew: false,
-    isPopular: false,
-    inStock: true,
-  },
-  {
-    id: 4,
-    title: "Дезинфицирующие салфетки MediWipes",
-    price: 950,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Дезинфицирующие средства",
-    isNew: true,
-    isPopular: false,
-    inStock: false,
-  },
-  {
-    id: 5,
-    title: "Концентрат для дезинфекции Dezex",
-    price: 4500,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Дезинфицирующие средства",
-    isNew: false,
-    isPopular: true,
-    inStock: true,
-  },
-  {
-    id: 6,
-    title: "Средство для обработки поверхностей SurfClean",
-    price: 2100,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Моющие средства",
-    isNew: false,
-    isPopular: false,
-    inStock: true,
-  },
-  {
-    id: 7,
-    title: "Антибактериальный гель HandSafe",
-    price: 1200,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Антисептические средства",
-    isNew: false,
-    isPopular: false,
-    inStock: true,
-  },
-  {
-    id: 8,
-    title: "Дезинфицирующий спрей AeroClean",
-    price: 1800,
-    image: "/placeholder.svg?height=300&width=300",
-    category: "Дезинфицирующие средства",
-    isNew: true,
-    isPopular: false,
-    inStock: true,
-  },
-];
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useProductsQuery } from "@/entities/product/hooks/query/use-get-products.query";
 
 export function ProductsBlock() {
+  const { data: products, isLoading, error } = useProductsQuery();
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="py-12">
+        <div className="mb-8 text-center">
+          <h2 className="mb-2 text-3xl font-bold">Популярные товары</h2>
+          <p className="mx-auto max-w-2xl text-muted-foreground">
+            Профессиональные дезинфицирующие и моющие средства высокого качества
+            для различных сфер применения
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {Array(8)
+            .fill(0)
+            .map((_, index) => (
+              <div key={index} className="flex flex-col space-y-3">
+                <Skeleton className="h-[300px] w-full rounded-md" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-8 w-1/3" />
+              </div>
+            ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="py-12">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Ошибка</AlertTitle>
+          <AlertDescription>
+            Не удалось загрузить товары. Пожалуйста, попробуйте позже.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="py-12">
       <div className="mb-8 text-center">
@@ -95,9 +62,15 @@ export function ProductsBlock() {
         </p>
       </div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {products.map((product) => (
-          <ProductCard product={product} />
-        ))}
+        {products && products.length > 0 ? (
+          products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))
+        ) : (
+          <div className="col-span-full text-center py-8">
+            <p className="text-muted-foreground">Товары не найдены</p>
+          </div>
+        )}
       </div>
       <div className="mt-8 text-center">
         <Button variant="outline" size="lg">
