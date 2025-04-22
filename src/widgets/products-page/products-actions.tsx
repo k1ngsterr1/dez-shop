@@ -12,7 +12,11 @@ import {
   FileText,
 } from "lucide-react";
 
-export function ProductActions() {
+interface ProductActionsProps {
+  expiry: string;
+}
+
+export function ProductActions({ expiry }: ProductActionsProps) {
   const [quantity, setQuantity] = useState(1);
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
@@ -32,7 +36,7 @@ export function ProductActions() {
         </div>
         <div className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />
-          <span>Срок годности: 3 года</span>
+          <span>Срок годности: {expiry}</span>
         </div>
         <div className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-primary" />

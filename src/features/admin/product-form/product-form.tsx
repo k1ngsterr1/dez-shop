@@ -9,7 +9,6 @@ import { Trash2, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
   Form,
@@ -39,7 +38,7 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
-// Define the product schema with required fields
+// Update the schema to use strings for both volume and expiry
 const productFormSchema = z.object({
   name: z.string().min(2, {
     message: "Название должно содержать не менее 2 символов",
@@ -56,6 +55,8 @@ const productFormSchema = z.object({
     .multipleOf(0.01, {
       message: "Цена должна быть указана с точностью до копеек",
     }),
+  volume: z.string().min(1, { message: "Укажите объем продукта" }),
+  expiry: z.string().optional(),
   isInStock: z.boolean(),
   isPopular: z.boolean(),
 });
@@ -63,11 +64,14 @@ const productFormSchema = z.object({
 // Define the type for form values
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
+// Update the default values
 const defaultValues: ProductFormValues = {
   name: "",
   category: "",
   description: "",
   price: 0,
+  volume: "",
+  expiry: "",
   isInStock: true,
   isPopular: false,
 };
@@ -89,7 +93,7 @@ export function ProductForm({
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const { data: categories = [], isLoading, refetch } = useCategoriesQuery();
 
-  // Initialize form with proper types
+  // Update the form initialization
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -97,6 +101,8 @@ export function ProductForm({
       category: initialData?.category || "",
       description: initialData?.description || "",
       price: initialData?.price || 0,
+      volume: initialData?.volume?.toString() || "",
+      expiry: initialData?.expiry || "",
       isInStock:
         initialData?.isInStock !== undefined ? initialData.isInStock : true,
       isPopular:
@@ -151,7 +157,7 @@ export function ProductForm({
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Update the handleFormSubmit function to only send FormData
+  // Update the handleFormSubmit function to use the expiry string directly
   const handleFormSubmit = async (data: ProductFormValues) => {
     if (images.length === 0 && imageUrls.length === 0) {
       form.setError("root", {
@@ -175,7 +181,6 @@ export function ProductForm({
       });
 
       // When updating, we'll send the current image URLs as a JSON string
-      // This replaces the previous approach of adding each URL as a separate "existingImages" field
       if (isEditing) {
         // Filter out blob URLs (new images) and only include existing URLs from the server
         const existingImageUrls = imageUrls.filter(
@@ -237,7 +242,7 @@ export function ProductForm({
                     </FormControl>
                     <SelectContent>
                       {categories.map((category) => (
-                        <SelectItem value={category.name}>
+                        <SelectItem key={category.name} value={category.name}>
                           {category.name}
                         </SelectItem>
                       ))}
@@ -256,11 +261,18 @@ export function ProductForm({
               <FormItem>
                 <FormLabel>Описание</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder="Введите описание продукта"
-                    className="min-h-24 resize-y"
-                    {...field}
-                  />
+                  <div className="w-full">
+                    <textarea
+                      placeholder="Введите описание продукта"
+                      className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y break-words"
+                      style={{
+                        wordWrap: "break-word",
+                        overflowWrap: "break-word",
+                        whiteSpace: "pre-wrap",
+                      }}
+                      {...field}
+                    />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -326,27 +338,71 @@ export function ProductForm({
             )}
           </div>
 
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Цена</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-                      ₽
-                    </span>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Цена</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
+                        ₽
+                      </span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        className="pl-8"
+                        {...field}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="volume"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Объем</FormLabel>
+                  <FormControl>
                     <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      className="pl-8"
+                      placeholder="Например, 1 литр, 500 мл"
+                      className="w-full"
+                      style={{ textOverflow: "ellipsis" }}
                       {...field}
                     />
-                  </div>
+                  </FormControl>
+                  <FormDescription>Укажите объем продукта</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="expiry"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Срок годности</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Например, 3 года, 2 месяца, 2 дня, день"
+                    className="w-full"
+                    style={{ textOverflow: "ellipsis" }}
+                    {...field}
+                  />
                 </FormControl>
+                <FormDescription>
+                  Укажите срок годности продукта
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

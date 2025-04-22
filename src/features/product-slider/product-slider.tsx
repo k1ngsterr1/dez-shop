@@ -16,8 +16,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useProductsQuery } from "@/entities/product/hooks/query/use-get-products.query";
+import { useRouter } from "next/navigation";
 
 export function ProductSlider() {
+  const navigate = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
   const { data: products, isLoading, error } = useProductsQuery();
@@ -113,7 +115,11 @@ export function ProductSlider() {
                     {product.description ||
                       `${product.category} - ${product.price} ₽`}
                   </p>
-                  <Button>Подробнее</Button>
+                  <Button
+                    onClick={() => navigate.push(`/product/${product.id}`)}
+                  >
+                    Подробнее
+                  </Button>
                 </div>
               </div>
             </CarouselItem>

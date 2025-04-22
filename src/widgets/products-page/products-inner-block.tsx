@@ -1,63 +1,40 @@
 "use client";
-
+import { useParams } from "next/navigation";
 import { ProductGallery } from "./product-gallery";
 import { ProductInfo } from "./product-info";
 import { ProductTabs } from "./product-tabs";
 import { ProductActions } from "./products-actions";
 import { ProductBreadcrumbs } from "./products-breadcrumbs";
-
-// Sample product data
-const product = {
-  id: 1,
-  name: "ДезоПроф Ультра",
-  subtitle: "Концентрированное средство для дезинфекции поверхностей",
-  description:
-    "Высокоэффективное концентрированное средство для дезинфекции поверхностей в медицинских учреждениях, на предприятиях пищевой промышленности и в быту. Обладает широким спектром антимикробной активности.",
-  price: 1250,
-  oldPrice: 1450,
-  discount: 14,
-  sku: "DP-ULTRA-1L",
-  rating: 4.8,
-  reviewCount: 124,
-  inStock: true,
-  isNew: true,
-  volume: "1 литр",
-  concentration: "2%",
-  images: [
-    "/product-main.jpg",
-    "/product-angle.jpg",
-    "/product-usage.jpg",
-    "/product-package.jpg",
-  ],
-  features: [
-    "Уничтожает 99.9% бактерий и вирусов",
-    "Безопасно для большинства поверхностей",
-    "Экономичный расход",
-    "Не содержит хлора и альдегидов",
-    "Имеет приятный запах",
-  ],
-  specifications: [
-    {
-      name: "Действующее вещество",
-      value: "Четвертичные аммониевые соединения",
-    },
-    { name: "Форма выпуска", value: "Жидкий концентрат" },
-    { name: "Срок годности", value: "3 года" },
-    { name: "pH", value: "7.0-8.5" },
-    { name: "Класс опасности", value: "4 (малоопасное вещество)" },
-    {
-      name: "Спектр действия",
-      value: "Бактерицидный, вирулицидный, фунгицидный",
-    },
-  ],
-  relatedProducts: [
-    { id: 2, name: "ДезоПроф Актив", price: 850, image: "/product-2.jpg" },
-    { id: 3, name: "ДезоПроф Хлор", price: 650, image: "/product-3.jpg" },
-    { id: 4, name: "ДезоПроф Антисептик", price: 450, image: "/product-4.jpg" },
-  ],
-};
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { useProductQuery } from "@/entities/product/hooks/query/use-get-product.query";
 
 export default function ProductDetailPage() {
+  const params = useParams();
+  const productId = Number(params?.id) || 1; // Default to 1 if no ID is provided
+
+  const { data: product, isLoading, error } = useProductQuery(productId);
+
+  if (isLoading) {
+    return <ProductDetailSkeleton />;
+  }
+
+  if (error || !product) {
+    return (
+      <div className="container w-full mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            {error?.message ||
+              "Failed to load product details. Please try again later."}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="container w-full mx-auto px-4 py-8">
       <ProductBreadcrumbs productName={product.name} />
@@ -70,13 +47,48 @@ export default function ProductDetailPage() {
         />
         <div>
           <ProductInfo product={product} />
-          <ProductActions />
+          <ProductActions expiry={product.expiry} />
         </div>
       </div>
-      <ProductTabs
-        features={product.features}
-        specifications={product.specifications}
-      />
+      <ProductTabs description={product.description} />
+    </div>
+  );
+}
+
+function ProductDetailSkeleton() {
+  return (
+    <div className="container w-full mx-auto px-4 py-8">
+      <div className="h-6 w-64 mb-8">
+        <Skeleton className="h-full w-full" />
+      </div>
+      <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="aspect-square w-full">
+          <Skeleton className="h-full w-full" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-3/4" />
+          <Skeleton className="h-6 w-1/2" />
+          <Skeleton className="h-6 w-1/4" />
+          <div className="space-y-2 mt-6">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+          <div className="pt-6">
+            <Skeleton className="h-12 w-full" />
+          </div>
+        </div>
+      </div>
+      <div>
+        <div className="border-b mb-4">
+          <Skeleton className="h-10 w-64" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+        </div>
+      </div>
     </div>
   );
 }

@@ -39,7 +39,10 @@ import { useProductsQuery } from "@/entities/product/hooks/query/use-get-product
 import { useCreateProductMutation } from "@/entities/product/hooks/mutation/use-create-product.mutation";
 import { useUpdateProductMutation } from "@/entities/product/hooks/mutation/use-update-product.mutation";
 import { useDeleteProductMutation } from "@/entities/product/hooks/mutation/use-delete-product.mutation";
-import { Product, ProductWithImages } from "@/entities/product/dto/product.dto";
+import type {
+  Product,
+  ProductWithImages,
+} from "@/entities/product/dto/product.dto";
 
 export default function ProductsPage() {
   // Custom hooks
@@ -205,6 +208,8 @@ export default function ProductsPage() {
                     <TableHead>Продукт</TableHead>
                     <TableHead>Категория</TableHead>
                     <TableHead>Цена</TableHead>
+                    <TableHead>Объем (л)</TableHead>
+                    <TableHead>Срок годности</TableHead>
                     <TableHead>Наличие</TableHead>
                     <TableHead>Популярный</TableHead>
                     <TableHead className="w-[80px]">Действия</TableHead>
@@ -240,6 +245,8 @@ export default function ProductsPage() {
                           currency: "RUB",
                         }).format(product.price)}
                       </TableCell>
+                      <TableCell>{product.volume || "—"}</TableCell>
+                      <TableCell>{product.expiry || "—"}</TableCell>
                       <TableCell>
                         <Badge
                           variant={product.isInStock ? "default" : "secondary"}

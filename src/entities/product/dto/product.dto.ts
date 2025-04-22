@@ -7,6 +7,8 @@ export interface Product {
   isInStock: boolean;
   isPopular: boolean;
   images: string[];
+  volume: number;
+  expiry: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +18,8 @@ export interface ProductFormValues {
   category: string;
   description: string;
   price: number;
+  volume: number;
+  expiry: string;
   isInStock: boolean;
   isPopular: boolean;
 }
