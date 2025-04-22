@@ -5,7 +5,6 @@ import "./globals.css";
 import { Header } from "@/features/header/header";
 import { Footer } from "@/features/footer/footer";
 import { ThemeProvider } from "next-themes";
-import { ContactForm } from "@/widgets/contacts-page/contacts-form";
 import { ContactFormPopup } from "@/entities/contact-form/ui/contact-form-popup";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"] });

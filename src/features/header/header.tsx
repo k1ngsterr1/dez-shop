@@ -12,10 +12,8 @@ import {
   Menu,
   X,
   Phone,
-  User,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
 import { ModeToggle } from "@/shared/ui/toggle-mode/toggle-mode";
 
 export function Header() {

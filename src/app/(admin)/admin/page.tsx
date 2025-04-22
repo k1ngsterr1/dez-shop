@@ -1,5 +1,4 @@
 import { ProductSlider } from "@/features/product-slider/product-slider";
-import { ArticlesList } from "@/widgets/home-page/articles-list";
 import { DisinfectantCalculator } from "@/widgets/home-page/calculator";
 import { Categories } from "@/widgets/home-page/categories";
 import { HeroSection } from "@/widgets/home-page/hero-section";

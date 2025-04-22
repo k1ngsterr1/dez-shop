@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Check, Droplets, Info } from "lucide-react";
+import { Check, Droplets } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 interface ProductInfoProps {

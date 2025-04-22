@@ -1,8 +1,7 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ProductFeaturesTab } from "./products-feature-tab";
-import { ProductSpecificationsTab } from "./product-specification";
 
 interface ProductTabsProps {
   description: string;

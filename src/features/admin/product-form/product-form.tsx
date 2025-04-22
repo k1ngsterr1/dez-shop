@@ -29,6 +29,7 @@ import {
 import { DialogFooter } from "@/components/ui/dialog";
 import type { ProductWithImages } from "@/entities/product/dto/product.dto";
 import { useCategoriesQuery } from "@/entities/category/hooks/query/use-get-categories.query";
+import Image from "next/image";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = [
@@ -64,18 +65,6 @@ const productFormSchema = z.object({
 // Define the type for form values
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
-// Update the default values
-const defaultValues: ProductFormValues = {
-  name: "",
-  category: "",
-  description: "",
-  price: 0,
-  volume: "",
-  expiry: "",
-  isInStock: true,
-  isPopular: false,
-};
-
 interface ProductFormProps {
   onSubmit: (data: ProductWithImages) => void;
   initialData?: ProductWithImages;
@@ -91,7 +80,7 @@ export function ProductForm({
 }: ProductFormProps) {
   const [images, setImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const { data: categories = [], isLoading, refetch } = useCategoriesQuery();
+  const { data: categories = [] } = useCategoriesQuery();
 
   // Update the form initialization
   const form = useForm<ProductFormValues>({
@@ -313,8 +302,12 @@ export function ProductForm({
               <div className="grid grid-cols-2 gap-4 mt-4 sm:grid-cols-3 md:grid-cols-4">
                 {imageUrls.map((url, index) => (
                   <div key={index} className="relative group">
-                    <div className="overflow-hidden rounded-lg aspect-square bg-muted">
-                      <img
+                    <div
+                      key={index}
+                      className="overflow-hidden rounded-lg aspect-square bg-muted"
+                    >
+                      <Image
+                        key={index}
                         src={url || "/placeholder.svg"}
                         alt={`Product image ${index + 1}`}
                         className="object-cover w-full h-full"

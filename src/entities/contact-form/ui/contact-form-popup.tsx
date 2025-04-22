@@ -57,7 +57,6 @@ export function ContactFormPopup() {
     }
   }, [isOpen]);
 
-  // Handle click outside to close
   useClickAway(formRef as any, () => {
     if (isOpen && !isSubmitting) {
       closeContactForm();

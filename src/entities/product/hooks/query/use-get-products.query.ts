@@ -5,6 +5,7 @@ import axios from "axios";
 import { getProducts } from "../../api/get/get-products.api";
 
 export const useProductsQuery = (name?: string) => {
+  //@ts-ignore
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

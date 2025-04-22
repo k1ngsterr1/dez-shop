@@ -76,7 +76,7 @@ export function ProductSlider() {
     );
   }
 
-  // Helper function to determine if a product should have a badge
+  // @ts-ignore
   const getBadgeText = (product: any) => {
     if (product.isNew) return "Новинка";
     if (product.isPopular) return "Популярное";
@@ -129,7 +129,7 @@ export function ProductSlider() {
         <CarouselNext className="right-4" />
       </Carousel>
       <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2 p-2">
-        {products.slice(0, 10).map((_: any, index: number) => (
+        {products.slice(0, 10).map((_: number, index: number) => (
           <span
             key={index}
             className={`block h-2 w-2 rounded-full ${

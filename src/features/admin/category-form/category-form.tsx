@@ -27,10 +27,6 @@ const categoryFormSchema = z.object({
 // Define the type for form values
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
-const defaultValues: CategoryFormValues = {
-  name: "",
-};
-
 interface CategoryFormProps {
   onSubmit: (data: CategoryFormValues) => void;
   initialData?: Category;

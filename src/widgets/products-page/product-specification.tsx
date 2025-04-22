@@ -1,6 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
-
 interface ProductSpecificationsTabProps {
   specifications: Array<{ name: string; value: string }>;
 }

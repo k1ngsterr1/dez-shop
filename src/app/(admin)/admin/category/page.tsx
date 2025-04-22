@@ -69,6 +69,7 @@ export default function CategoriesPage() {
       setAddDialogOpen(false);
       refetch(); // Refresh the categories list
     } catch (error) {
+      console.error("Error with adding category:", error);
       toast({
         title: "Ошибка",
         description: "Не удалось добавить категорию",
@@ -89,6 +90,7 @@ export default function CategoriesPage() {
         setCurrentCategory(null);
         refetch(); // Refresh the categories list
       } catch (error) {
+        console.error("Error with updating category:", error);
         toast({
           title: "Ошибка",
           description: "Не удалось обновить категорию",
@@ -107,6 +109,7 @@ export default function CategoriesPage() {
       });
       refetch(); // Refresh the categories list
     } catch (error) {
+      console.error("Error with deleting category:", error);
       toast({
         title: "Ошибка",
         description: "Не удалось удалить категорию",
@@ -232,10 +235,10 @@ export default function CategoriesPage() {
                                   Удалить категорию?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Вы уверены, что хотите удалить категорию "
-                                  {category.name}"? Это действие нельзя
-                                  отменить. Удаление категории может повлиять на
-                                  продукты, связанные с ней.
+                                  Вы уверены, что хотите удалить категорию
+                                  {category.name}? Это действие нельзя отменить.
+                                  Удаление категории может повлиять на продукты,
+                                  связанные с ней.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>

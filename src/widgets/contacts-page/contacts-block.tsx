@@ -122,7 +122,7 @@ export function ContactsBlock() {
             <div>
               <p>г. Алматы, ул. Примерная, 123</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Бизнес-центр "Название", 4 этаж, офис 405
+                Бизнес-центр Название, 4 этаж, офис 405
               </p>
             </div>
           </div>
@@ -131,12 +131,12 @@ export function ContactsBlock() {
         <ContactCard icon={Building} title="Реквизиты">
           <ul className="space-y-2 text-sm">
             <li>
-              <span className="font-medium">ТОО "ProfDez Kazakhstan"</span>
+              <span className="font-medium">ТОО ProfDez Kazakhstan</span>
             </li>
             <li>БИН: 123456789012</li>
             <li>ИИК: KZ123456789012345678</li>
             <li>БИК: ABCDEFGH</li>
-            <li>Банк: АО "Название Банка"</li>
+            <li>Банк: АО Название Банка</li>
           </ul>
         </ContactCard>
 

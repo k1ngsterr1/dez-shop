@@ -43,6 +43,7 @@ import type {
   Product,
   ProductWithImages,
 } from "@/entities/product/dto/product.dto";
+import Image from "next/image";
 
 export default function ProductsPage() {
   // Custom hooks
@@ -76,6 +77,7 @@ export default function ProductsPage() {
       setAddDialogOpen(false);
       refetch(); // Refresh the products list
     } catch (error) {
+      console.error("Error with adding product:", error);
       toast({
         title: "Ошибка",
         description: "Не удалось добавить продукт",
@@ -96,6 +98,7 @@ export default function ProductsPage() {
         setCurrentProduct(null);
         refetch(); // Refresh the products list
       } catch (error) {
+        console.error("Error with updating product:", error);
         toast({
           title: "Ошибка",
           description: "Не удалось обновить продукт",
@@ -114,6 +117,7 @@ export default function ProductsPage() {
       });
       refetch(); // Refresh the products list
     } catch (error) {
+      console.error("Error with deleting product:", error);
       toast({
         title: "Ошибка",
         description: "Не удалось удалить продукт",
@@ -222,7 +226,7 @@ export default function ProductsPage() {
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-md bg-muted overflow-hidden">
                             {product.images.length > 0 ? (
-                              <img
+                              <Image
                                 src={product.images[0] || "/placeholder.svg"}
                                 alt={product.name}
                                 className="h-full w-full object-cover"
@@ -279,8 +283,8 @@ export default function ProductsPage() {
                                   Удалить продукт?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Вы уверены, что хотите удалить продукт "
-                                  {product.name}"? Это действие нельзя отменить.
+                                  Вы уверены, что хотите удалить продукт
+                                  {product.name}? Это действие нельзя отменить.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>

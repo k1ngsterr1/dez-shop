@@ -1,28 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  ShoppingCart,
-  Share2,
-  Truck,
-  ShieldCheck,
-  Clock,
-  FileText,
-} from "lucide-react";
+import { Truck, ShieldCheck, Clock, FileText } from "lucide-react";
 
 interface ProductActionsProps {
   expiry: string;
 }
 
 export function ProductActions({ expiry }: ProductActionsProps) {
-  const [quantity, setQuantity] = useState(1);
-
-  const increaseQuantity = () => setQuantity((prev) => prev + 1);
-  const decreaseQuantity = () =>
-    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 text-sm">

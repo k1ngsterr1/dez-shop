@@ -1,18 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Droplets,
-  Sparkles,
-  SprayCanIcon as Spray,
-  Home,
-  Bug,
-  Rat,
-  Timer,
-  Shield,
-  AlertCircle,
-  type LucideIcon,
-} from "lucide-react";
+import { Droplets, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useCategoriesQuery } from "@/entities/category/hooks/query/use-get-categories.query";
