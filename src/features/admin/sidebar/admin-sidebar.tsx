@@ -1,214 +1,115 @@
 "use client";
 
-import { useState } from "react";
+import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BarChart3,
-  FileText,
-  Home,
-  Package,
-  Settings,
-  ShoppingCart,
-  Users,
-  LogOut,
-} from "lucide-react";
+import { Package, Settings, X, Menu, House } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 const navigationItems = [
   {
-    title: "Dashboard",
-    icon: Home,
-    href: "/admin",
-  },
-  {
-    title: "Analytics",
-    icon: BarChart3,
-    href: "/admin/analytics",
-  },
-  {
-    title: "Products",
+    title: "Продукты",
     icon: Package,
     href: "/admin/products",
-    subItems: [
-      {
-        title: "All Products",
-        href: "/admin/products",
-      },
-      {
-        title: "Add Product",
-        href: "/admin/products/new",
-      },
-      {
-        title: "Categories",
-        href: "/admin/products/categories",
-      },
-    ],
   },
   {
-    title: "Orders",
-    icon: ShoppingCart,
-    href: "/admin/orders",
-  },
-  {
-    title: "Customers",
-    icon: Users,
-    href: "/admin/customers",
-  },
-  {
-    title: "Content",
-    icon: FileText,
-    href: "/admin/content",
-    subItems: [
-      {
-        title: "Pages",
-        href: "/admin/content/pages",
-      },
-      {
-        title: "Blog Posts",
-        href: "/admin/content/blog",
-      },
-      {
-        title: "Media Library",
-        href: "/admin/content/media",
-      },
-    ],
-  },
-  {
-    title: "Settings",
+    title: "Категории",
     icon: Settings,
-    href: "/admin/settings",
+    href: "/admin/category",
+  },
+  {
+    title: "Главная",
+    icon: House,
+    href: "/",
   },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
-    Products: true, // Open the Products menu by default
-  });
+  const { state, setOpen } = useSidebar(); // ✅ Use context
+  const isVisible = state === "expanded";
 
-  const toggleMenu = (title: string) => {
-    setOpenMenus((prev) => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
-  };
-
-  const isActive = (href: string) => {
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
-      <SidebarHeader className="border-b">
-        <div className="flex items-center gap-2 px-2 py-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-            <span className="text-lg font-bold text-primary-foreground">A</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-bold">Admin Panel</span>
-            <span className="text-xs text-muted-foreground">
-              Manage your business
-            </span>
-          </div>
-        </div>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarMenu>
-          {navigationItems.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              {item.subItems ? (
-                <>
+    <>
+      {/* Show toggle button when sidebar is collapsed */}
+      {!isVisible && (
+        <Button
+          onClick={() => setOpen(true)}
+          className="fixed left-4 top-4 z-50 shadow-md transition-all duration-300 hover:scale-105"
+          size="icon"
+          variant="outline"
+        >
+          <Menu className="h-4 w-4" />
+          <span className="sr-only">Open Sidebar</span>
+        </Button>
+      )}
+
+      {/* Sidebar container */}
+      <div
+        className={`fixed inset-y-0 left-0 z-40 transition-all duration-300 ease-in-out ${
+          isVisible
+            ? "translate-x-0 opacity-100 pointer-events-auto"
+            : "-translate-x-full opacity-0 pointer-events-none"
+        }`}
+        style={{ width: "var(--sidebar-width)" }}
+      >
+        <Sidebar
+          variant="sidebar"
+          collapsible="icon"
+          className="h-full w-full shadow-xl"
+        >
+          <SidebarHeader className="border-b !w-full bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
+            <div className="flex items-center justify-between px-2 py-5">
+              <span className="text-base font-bold tracking-tight">
+                PROFDEZ
+              </span>
+              <Button
+                onClick={() => setOpen(false)}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 transition-all duration-200 hover:rotate-90"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close Sidebar</span>
+              </Button>
+            </div>
+          </SidebarHeader>
+
+          <SidebarContent className="px-4 w-full py-6">
+            <SidebarMenu>
+              {navigationItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
-                    onClick={() => toggleMenu(item.title)}
                     isActive={isActive(item.href)}
                     tooltip={item.title}
+                    className="mb-2 py-2.5 flex items-center justify-center w-full transition-colors duration-200"
                   >
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
-                    <span className="ml-auto">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className={`h-4 w-4 transition-transform ${
-                          openMenus[item.title] ? "rotate-180" : ""
-                        }`}
-                      >
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                      </svg>
-                    </span>
+                    <Link href={item.href} className="flex items-center gap-2">
+                      <item.icon className="h-5 w-5" />
+                      <span className="font-medium">{item.title}</span>
+                    </Link>
                   </SidebarMenuButton>
-                  {openMenus[item.title] && (
-                    <SidebarMenuSub>
-                      {item.subItems.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={isActive(subItem.href)}
-                          >
-                            <Link href={subItem.href}>{subItem.title}</Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  )}
-                </>
-              ) : (
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive(item.href)}
-                  tooltip={item.title}
-                >
-                  <Link href={item.href}>
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              )}
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter className="border-t p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="/vibrant-street-market.png" alt="Avatar" />
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">John Doe</span>
-              <span className="text-xs text-muted-foreground">Admin</span>
-            </div>
-          </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <LogOut className="h-4 w-4" />
-            <span className="sr-only">Log out</span>
-          </Button>
-        </div>
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarContent>
+
+          <SidebarRail />
+        </Sidebar>
+      </div>
+    </>
   );
 }

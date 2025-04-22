@@ -136,21 +136,17 @@ export function HeroSection() {
                 <div className="rounded-full bg-primary/10 p-2 flex-shrink-0">
                   <Droplets className="h-5 w-5 text-primary" />
                 </div>
-                <span className="font-medium">99.9% эффективность</span>
+                <span className="font-medium dark:text-black">
+                  99.9% эффективность
+                </span>
               </div>
-
               <div className="absolute -bottom-6 left-[20%] bg-white/95 backdrop-blur-sm px-5 py-3 rounded-full shadow-xl z-20 flex items-center gap-3 hover:shadow-lg transition-shadow">
                 <div className="rounded-full bg-primary/10 p-2 flex-shrink-0">
-                  <Shield className="h-5 w-5 text-primary" />
+                  <Shield className="h-5 w-5 text-primary " />
                 </div>
-                <span className="font-medium">Безопасно для поверхностей</span>
-              </div>
-
-              <div className="absolute top-[30%] -right-8 bg-white/95 backdrop-blur-sm px-5 py-3 rounded-full shadow-xl z-20 flex items-center gap-3 hover:shadow-lg transition-shadow">
-                <div className="rounded-full bg-primary/10 p-2 flex-shrink-0">
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                </div>
-                <span className="font-medium">Быстрый результат</span>
+                <span className="font-medium dark:text-black">
+                  Безопасно для поверхностей
+                </span>
               </div>
             </div>
           </div>

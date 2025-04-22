@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/entities/product/ui/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
@@ -71,11 +70,6 @@ export function ProductsBlock() {
             <p className="text-muted-foreground">Товары не найдены</p>
           </div>
         )}
-      </div>
-      <div className="mt-8 text-center">
-        <Button variant="outline" size="lg">
-          Смотреть все товары
-        </Button>
       </div>
     </div>
   );

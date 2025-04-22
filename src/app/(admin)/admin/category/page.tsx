@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Loader2, Search, Trash2, Pencil } from "lucide-react";
+import { Plus, Search, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,9 +36,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { useCreateCategoryMutation } from "@/entities/category/hooks/mutation/use-create-category.mutation";
 import { useUpdateCategoryMutation } from "@/entities/category/hooks/mutation/use-update-category.mutation";
 import { useDeleteCategoryMutation } from "@/entities/category/hooks/mutation/use-delete-category.mutation";
-import { Category } from "@/entities/category/dto/category.dto";
+import type { Category } from "@/entities/category/dto/category.dto";
 import { CategoryForm } from "@/features/admin/category-form/category-form";
 import { useCategoriesQuery } from "@/entities/category/hooks/query/use-get-categories.query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CategoriesPage() {
   // Custom hooks
@@ -123,9 +124,30 @@ export default function CategoriesPage() {
     setEditDialogOpen(true);
   };
 
+  // Skeleton loader component for table rows
+  const TableRowSkeleton = () => (
+    <TableRow className="animate-pulse">
+      <TableCell>
+        <Skeleton className="h-5 w-[180px]" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-5 w-[100px]" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-5 w-[100px]" />
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex items-center justify-end gap-2">
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+
   return (
     <div className="w-full">
-      <div className="max-w-5xl w-full mx-auto">
+      <div className="max-w-7xl  w-full mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Категории</h1>
@@ -168,35 +190,40 @@ export default function CategoriesPage() {
           </div>
         </div>
 
-        {isLoading && (
-          <div className="flex justify-center my-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        )}
-
-        {!isLoading && filteredCategories.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              Категории не найдены. Попробуйте изменить параметры поиска или
-              добавьте новую категорию.
-            </p>
-          </div>
-        ) : (
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
+        <Card>
+          <CardContent className="p-5">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Название</TableHead>
+                  <TableHead>Дата создания</TableHead>
+                  <TableHead>Дата обновления</TableHead>
+                  <TableHead className="w-[100px] text-right">
+                    Действия
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  // Skeleton loading state
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <TableRowSkeleton key={index} />
+                  ))
+                ) : filteredCategories.length === 0 ? (
                   <TableRow>
-                    <TableHead>Название</TableHead>
-                    <TableHead>Дата создания</TableHead>
-                    <TableHead>Дата обновления</TableHead>
-                    <TableHead className="w-[100px] text-right">
-                      Действия
-                    </TableHead>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                      <div className="flex flex-col items-center justify-center text-muted-foreground">
+                        <p>Категории не найдены.</p>
+                        <p className="text-sm">
+                          Попробуйте изменить параметры поиска или добавьте
+                          новую категорию.
+                        </p>
+                      </div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCategories.map((category: Category) => (
+                ) : (
+                  // Actual data
+                  filteredCategories.map((category: Category) => (
                     <TableRow key={category.id}>
                       <TableCell className="font-medium">
                         {category.name}
@@ -235,7 +262,7 @@ export default function CategoriesPage() {
                                   Удалить категорию?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Вы уверены, что хотите удалить категорию
+                                  Вы уверены, что хотите удалить категорию{" "}
                                   {category.name}? Это действие нельзя отменить.
                                   Удаление категории может повлиять на продукты,
                                   связанные с ней.
@@ -257,12 +284,12 @@ export default function CategoriesPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        )}
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
         {/* Edit Category Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>

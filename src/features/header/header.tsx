@@ -70,12 +70,6 @@ export function Header() {
             >
               Контакты
             </Link>
-            <Link
-              href="/how-to-buy"
-              className="hover:text-primary-foreground/80 transition-colors"
-            >
-              Как купить
-            </Link>
           </div>
           <div className="flex items-center space-x-6 text-sm">
             <ModeToggle />

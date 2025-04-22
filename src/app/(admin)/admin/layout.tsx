@@ -1,13 +1,26 @@
+"use client";
+
 import type React from "react";
-import type { Metadata } from "next";
 import "./globals.css";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/features/admin/sidebar/admin-sidebar";
 
-export const metadata: Metadata = {
-  title: "Admin Dashboard",
-  description: "Admin dashboard for managing your application",
-};
+// Wrapper component to access sidebar state
+function MainContent({ children }: { children: React.ReactNode }) {
+  const { state } = useSidebar();
+
+  const isOpen = state === "expanded"; // reactive to state changes
+
+  return (
+    <div
+      className={`flex-1 w-0 ${
+        isOpen ? "md:ml-[400px]" : ""
+      } transition-all duration-300`}
+    >
+      <main className="h-full p-6">{children}</main>
+    </div>
+  );
+}
 
 export default function AdminLayout({
   children,
@@ -20,9 +33,7 @@ export default function AdminLayout({
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-screen w-full">
             <AdminSidebar />
-            <div className="flex-1 w-0">
-              <main className="h-full p-6">{children}</main>
-            </div>
+            <MainContent>{children}</MainContent>
           </div>
         </SidebarProvider>
       </body>

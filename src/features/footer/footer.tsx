@@ -12,7 +12,7 @@ export function Footer() {
   return (
     <footer className="border-t bg-muted/40">
       <div className="container w-full mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           <div>
             <h3 className="mb-4 text-lg font-bold">О компании</h3>
             <p className="text-sm text-muted-foreground">
@@ -40,55 +40,8 @@ export function Footer() {
               </Link>
             </div>
           </div>
-
           <div>
-            <h3 className="mb-4 text-lg font-bold">Категории</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  href="/category/disinfectants"
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  Дезинфицирующие средства
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/category/cleaning"
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  Моющие средства
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/category/antiseptics"
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  Антисептические средства
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/category/home"
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  Средства для дезинфекции дома
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/category/insecticides"
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  Инсектицидные средства
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="mb-4 text-lg font-bold">Информация</h3>
+            <span className="mb-4 text-lg font-bold">Информация</span>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
@@ -108,9 +61,8 @@ export function Footer() {
               </li>
             </ul>
           </div>
-
           <div>
-            <h3 className="mb-4 text-lg font-bold">Контакты</h3>
+            <span className="mb-4 text-lg font-bold">Контакты</span>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start">
                 <Phone className="mr-2 mt-0.5 h-4 w-4 text-primary" />

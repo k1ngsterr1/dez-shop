@@ -22,7 +22,7 @@ interface IProductCard {
     category: string;
     isNew: boolean;
     isPopular: boolean;
-    inStock: boolean;
+    isInStock: boolean;
   };
 }
 
@@ -71,8 +71,8 @@ export const ProductCard: React.FC<IProductCard> = ({ product }) => {
       <CardContent className="p-4 pt-2">
         <div className="flex items-center justify-between">
           <div className="text-xl font-bold">{formatPrice(product.price)}</div>
-          {!product.inStock && (
-            <Badge className="text-muted-foreground">Нет в наличии</Badge>
+          {!product.isInStock && (
+            <Badge className="text-white">Нет в наличии</Badge>
           )}
         </div>
       </CardContent>
@@ -81,7 +81,7 @@ export const ProductCard: React.FC<IProductCard> = ({ product }) => {
         <Button
           className="w-full"
           onClick={openContactForm}
-          disabled={!product.inStock}
+          disabled={!product.isInStock}
         >
           Связаться
         </Button>

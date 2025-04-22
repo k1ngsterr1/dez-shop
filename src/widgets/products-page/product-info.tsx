@@ -43,7 +43,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
             <Check className="h-3 w-3 mr-1" /> В наличии
           </Badge>
         ) : (
-          <Badge variant="outline" className="ml-auto">
+          <Badge variant="outline" className="ml-auto !text-white">
             Нет в наличии
           </Badge>
         )}

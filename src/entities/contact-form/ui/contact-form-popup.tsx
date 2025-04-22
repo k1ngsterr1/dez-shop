@@ -213,7 +213,7 @@ export function ContactFormPopup() {
             aria-label="Закрыть"
             disabled={isSubmitting}
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 dark:text-black" />
           </button>
           <h2 className="text-2xl font-bold mb-1">Связаться с нами</h2>
           <p className="text-muted-foreground">

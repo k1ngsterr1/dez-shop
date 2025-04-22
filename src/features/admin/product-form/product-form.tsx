@@ -70,6 +70,7 @@ interface ProductFormProps {
   initialData?: ProductWithImages;
   isEditing?: boolean;
   isSubmitting?: boolean;
+  maxHeight?: string | number;
 }
 
 export function ProductForm({
@@ -77,6 +78,7 @@ export function ProductForm({
   initialData,
   isEditing = false,
   isSubmitting = false,
+  maxHeight = "70vh", // Default max height
 }: ProductFormProps) {
   const [images, setImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -182,7 +184,6 @@ export function ProductForm({
         }
       }
 
-      // Pass only the FormData to the parent component
       await onSubmit({
         formData,
         name: data.name, // Add name for toast message in the parent component
@@ -193,268 +194,291 @@ export function ProductForm({
   };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleFormSubmit)}
-        className="space-y-6"
-      >
-        <div className="grid gap-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Название</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Введите название продукта" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Категория</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+    <div className="flex flex-col h-full">
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleFormSubmit)}
+          className="flex flex-col h-full"
+        >
+          <div
+            className="flex-1 overflow-y-auto pr-4 -mr-4 space-y-6"
+            style={{
+              maxHeight: maxHeight,
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgba(155, 155, 155, 0.5) transparent",
+            }}
+          >
+            <div className="grid gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Название</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Введите название продукта"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Категория</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Выберите категорию" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem
+                              key={category.name}
+                              value={category.name}
+                            >
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Описание</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите категорию" />
-                      </SelectTrigger>
+                      <div className="w-full">
+                        <textarea
+                          placeholder="Введите описание продукта"
+                          className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y break-words"
+                          style={{
+                            wordWrap: "break-word",
+                            overflowWrap: "break-word",
+                            whiteSpace: "pre-wrap",
+                          }}
+                          {...field}
+                        />
+                      </div>
                     </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.name} value={category.name}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Описание</FormLabel>
-                <FormControl>
-                  <div className="w-full">
-                    <textarea
-                      placeholder="Введите описание продукта"
-                      className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y break-words"
-                      style={{
-                        wordWrap: "break-word",
-                        overflowWrap: "break-word",
-                        whiteSpace: "pre-wrap",
-                      }}
-                      {...field}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div>
-            <Label htmlFor="images">Изображения</Label>
-            <div className="mt-2">
-              <div className="flex items-center justify-center w-full">
-                <label
-                  htmlFor="dropzone-file"
-                  className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-background/50 border-border hover:bg-background/80"
-                >
-                  <div className="flex flex-col items-center justify-center pt-4 pb-4">
-                    <Upload className="w-6 h-6 mb-1 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium">Нажмите для загрузки</span>{" "}
-                      или перетащите файлы
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      PNG, JPG, WEBP (макс. 5MB)
-                    </p>
-                  </div>
-                  <input
-                    id="dropzone-file"
-                    type="file"
-                    className="hidden"
-                    accept="image/png, image/jpeg, image/jpg, image/webp"
-                    multiple
-                    onChange={handleImageChange}
-                  />
-                </label>
-              </div>
-            </div>
-
-            {imageUrls.length > 0 && (
-              <div className="grid grid-cols-2 gap-4 mt-4 sm:grid-cols-3 md:grid-cols-4">
-                {imageUrls.map((url, index) => (
-                  <div key={index} className="relative group">
-                    <div
-                      key={index}
-                      className="overflow-hidden rounded-lg aspect-square bg-muted"
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div>
+                <Label htmlFor="images">Изображения</Label>
+                <div className="mt-2">
+                  <div className="flex items-center justify-center w-full">
+                    <label
+                      htmlFor="dropzone-file"
+                      className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-background/50 border-border hover:bg-background/80"
                     >
-                      <Image
-                        key={index}
-                        src={url || "/placeholder.svg"}
-                        alt={`Product image ${index + 1}`}
-                        className="object-cover w-full h-full"
+                      <div className="flex flex-col items-center justify-center pt-4 pb-4">
+                        <Upload className="w-6 h-6 mb-1 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-medium">
+                            Нажмите для загрузки
+                          </span>{" "}
+                          или перетащите файлы
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          PNG, JPG, WEBP (макс. 5MB)
+                        </p>
+                      </div>
+                      <input
+                        id="dropzone-file"
+                        type="file"
+                        className="hidden"
+                        accept="image/png, image/jpeg, image/jpg, image/webp"
+                        multiple
+                        onChange={handleImageChange}
                       />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="w-4" />
-                    </button>
+                    </label>
                   </div>
-                ))}
+                </div>
+                {imageUrls.length > 0 && (
+                  <div className="grid grid-cols-2 gap-4 mt-4 sm:grid-cols-3 md:grid-cols-4">
+                    {imageUrls.map((url, index) => (
+                      <div key={index} className="relative group">
+                        <div
+                          key={index}
+                          className="overflow-hidden rounded-lg aspect-square bg-muted"
+                        >
+                          <Image
+                            width={100}
+                            height={100}
+                            key={index}
+                            src={url || "/placeholder.svg"}
+                            alt={`Product image ${index + 1}`}
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute cursor-pointer top-2 right-2 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2
+                            className="w-4 h-4 text-xs text-white"
+                            size={8}
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {form.formState.errors.root && (
+                  <p className="text-sm font-medium text-destructive mt-2">
+                    {form.formState.errors.root.message}
+                  </p>
+                )}
               </div>
-            )}
-            {form.formState.errors.root && (
-              <p className="text-sm font-medium text-destructive mt-2">
-                {form.formState.errors.root.message}
-              </p>
-            )}
-          </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Цена</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-                        ₽
-                      </span>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Цена</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
+                            ₸
+                          </span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                            className="pl-8"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="volume"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Объем</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Например, 1 литр, 500 мл"
+                          className="w-full"
+                          style={{ textOverflow: "ellipsis" }}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Укажите объем продукта</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="expiry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Срок годности</FormLabel>
+                    <FormControl>
                       <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="0.00"
-                        className="pl-8"
+                        placeholder="Например, 3 года, 2 месяца, 2 дня, день"
+                        className="w-full"
+                        style={{ textOverflow: "ellipsis" }}
                         {...field}
                       />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    </FormControl>
+                    <FormDescription>
+                      Укажите срок годности продукта
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="volume"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Объем</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Например, 1 литр, 500 мл"
-                      className="w-full"
-                      style={{ textOverflow: "ellipsis" }}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>Укажите объем продукта</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="isInStock"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">В наличии</FormLabel>
+                        <FormDescription>
+                          Товар доступен для покупки
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isPopular"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">
+                          Популярный товар
+                        </FormLabel>
+                        <FormDescription>
+                          Отображать в разделе популярных товаров
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
           </div>
 
-          <FormField
-            control={form.control}
-            name="expiry"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Срок годности</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Например, 3 года, 2 месяца, 2 дня, день"
-                    className="w-full"
-                    style={{ textOverflow: "ellipsis" }}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Укажите срок годности продукта
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="isInStock"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">В наличии</FormLabel>
-                    <FormDescription>
-                      Товар доступен для покупки
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
+          {/* Fixed footer with submit button */}
+          <DialogFooter className="mt-6 pt-4 border-t  bg-background">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               )}
-            />
-
-            <FormField
-              control={form.control}
-              name="isPopular"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">
-                      Популярный товар
-                    </FormLabel>
-                    <FormDescription>
-                      Отображать в разделе популярных товаров
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {isEditing ? "Сохранить изменения" : "Добавить продукт"}
-          </Button>
-        </DialogFooter>
-      </form>
-    </Form>
+              {isEditing ? "Сохранить изменения" : "Добавить продукт"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+    </div>
   );
 }
