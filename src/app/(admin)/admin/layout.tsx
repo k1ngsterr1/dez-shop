@@ -4,11 +4,11 @@ import type React from "react";
 import "./globals.css";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/features/admin/sidebar/admin-sidebar";
+import { AuthGuard } from "@/components/ui/auth-guard";
 
 // Wrapper component to access sidebar state
 function MainContent({ children }: { children: React.ReactNode }) {
   const { state } = useSidebar();
-
   const isOpen = state === "expanded"; // reactive to state changes
 
   return (
@@ -28,14 +28,16 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru">
+    <html>
       <body>
-        <SidebarProvider defaultOpen={true}>
-          <div className="flex min-h-screen w-full">
-            <AdminSidebar />
-            <MainContent>{children}</MainContent>
-          </div>
-        </SidebarProvider>
+        <AuthGuard requiredRole="ADMIN">
+          <SidebarProvider defaultOpen={true}>
+            <div className="flex min-h-screen w-full">
+              <AdminSidebar />
+              <MainContent>{children}</MainContent>
+            </div>
+          </SidebarProvider>
+        </AuthGuard>
       </body>
     </html>
   );

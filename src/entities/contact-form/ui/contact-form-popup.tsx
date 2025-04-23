@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useClickAway } from "@/shared/hooks/use-click-away";
 import { useContactFormStore } from "../store/use-contact-form";
+import { useSendForm } from "@/entities/user/hooks/mutations/use-send-form.mutation";
 
 interface FormData {
   name: string;
@@ -29,6 +30,7 @@ interface FormErrors {
 
 export function ContactFormPopup() {
   const { isOpen, closeContactForm } = useContactFormStore();
+  const { mutate, isLoading, error: submitError } = useSendForm();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -162,6 +164,7 @@ export function ContactFormPopup() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log("works");
     e.preventDefault();
 
     if (!validateForm()) return;
@@ -169,8 +172,14 @@ export function ContactFormPopup() {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Use the mutate function directly
+      const result = await mutate({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message,
+      });
 
       setIsSuccess(true);
       setTimeout(() => {
@@ -186,6 +195,7 @@ export function ContactFormPopup() {
       }, 2000);
     } catch (error) {
       console.error("Error submitting form:", error);
+      // You could add error handling UI here if needed
     } finally {
       setIsSubmitting(false);
     }
