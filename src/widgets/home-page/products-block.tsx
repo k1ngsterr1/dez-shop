@@ -9,7 +9,7 @@ import { useProductsQuery } from "@/entities/product/hooks/query/use-get-product
 export function ProductsBlock() {
   const { data: products, isLoading, error } = useProductsQuery();
 
-  // Loading state
+  // Loading statee
   if (isLoading) {
     return (
       <div className="py-12">
