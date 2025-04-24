@@ -61,9 +61,7 @@ export function Categories() {
           return (
             <li key={category.id || category.name}>
               <Link
-                href={
-                  category.href || `/category/${category.slug || category.id}`
-                }
+                href={category.href || `/category/${category.name}`}
                 className="flex items-center rounded-md p-2 text-sm transition-colors hover:bg-muted"
               >
                 <Droplets className="mr-2 h-4 w-4 text-primary" />
