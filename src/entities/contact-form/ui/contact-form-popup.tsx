@@ -30,7 +30,7 @@ interface FormErrors {
 
 export function ContactFormPopup() {
   const { isOpen, closeContactForm } = useContactFormStore();
-  const { mutate, isLoading, error: submitError } = useSendForm();
+  const { mutate } = useSendForm();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -172,7 +172,6 @@ export function ContactFormPopup() {
     setIsSubmitting(true);
 
     try {
-      // Use the mutate function directly
       const result = await mutate({
         name: formData.name,
         email: formData.email,
@@ -180,6 +179,8 @@ export function ContactFormPopup() {
         subject: formData.subject,
         message: formData.message,
       });
+
+      console.log(result);
 
       setIsSuccess(true);
       setTimeout(() => {

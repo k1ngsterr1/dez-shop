@@ -43,8 +43,7 @@ export default function LoginPage() {
       // Redirect after successful login
       router.push("/admin/products");
     } catch (err) {
-      // Error is already handled by the mutation hook
-      console.error("Login failed");
+      console.error("Login failed:", err);
     }
   };
 

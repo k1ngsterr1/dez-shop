@@ -1,5 +1,20 @@
-import { CategoryProductsContent } from "@/widgets/category-page/category-page";
+import type { Metadata } from "next";
+import CategoryPageClient from "@/widgets/category-page/category-page-client";
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  return <CategoryProductsContent slug={params.slug} />;
+type Props = {
+  params: any;
+};
+
+export async function generateMetadata({ params }: any): Promise<Metadata> {
+  const { slug } = await params;
+
+  return {
+    title: `Категория: ${slug}`,
+  };
+}
+
+export default async function CategoryPage({ params }: Props) {
+  const { slug } = await params;
+
+  return <CategoryPageClient slug={slug} />;
 }
