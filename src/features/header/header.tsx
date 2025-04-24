@@ -15,13 +15,24 @@ import {
   X,
   Phone,
   Loader2,
+  Mail,
+  Users2,
+  MapPin,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { ModeToggle } from "@/shared/ui/toggle-mode/toggle-mode";
 import Image from "next/image";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { useProductsQuery } from "@/entities/product/hooks/query/use-get-products.query";
+import { Separator } from "@/components/ui/separator";
 
 interface Product {
   id: string;
@@ -238,63 +249,108 @@ export function Header() {
               ) : (
                 <div className="flex items-center gap-3">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="icon"
                     onClick={() => setIsSearchOpen(true)}
-                    className="rounded-full"
+                    className="rounded-full h-9 w-9 border-primary/20 hover:bg-primary/5 transition-all"
                   >
-                    <Search className="h-4 w-4" />
+                    <Search className="h-4 w-4 text-primary" />
                   </Button>
                   <Sheet>
                     <SheetTrigger asChild>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
-                        className="rounded-full md:hidden"
+                        className="rounded-full h-9 w-9 border-primary/20 hover:bg-primary/5 transition-all md:hidden"
                       >
-                        <Menu className="h-4 w-4" />
+                        <Menu className="h-4 w-4 text-primary" />
                       </Button>
                     </SheetTrigger>
-                    <SheetContent>
-                      <div className="mt-8 flex flex-col space-y-4">
-                        <Link
-                          href="/about"
-                          className="hover:text-primary transition-colors"
-                        >
-                          О нас
-                        </Link>
-                        <Link
-                          href="/contacts"
-                          className="hover:text-primary transition-colors"
-                        >
-                          Контакты
-                        </Link>
+                    <SheetContent className="border-l border-primary/10 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm">
+                      <SheetHeader className="mb-6">
+                        <SheetTitle className="text-xl font-bold text-primary">
+                          Меню
+                        </SheetTitle>
+                        <SheetDescription>
+                          Навигация и контактная информация
+                        </SheetDescription>
+                      </SheetHeader>
 
-                        <div className="pt-4">
-                          <div className="mb-2 text-sm font-medium">
-                            Контакты:
+                      <div className="flex flex-col space-y-6">
+                        <div className="space-y-3">
+                          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                            Навигация
+                          </h3>
+                          <div className="flex flex-col space-y-1">
+                            <Link
+                              href="/about"
+                              className="group flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-primary/5 transition-all"
+                            >
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                <Users2 className="h-4 w-4 text-primary" />
+                              </div>
+                              <span className="font-medium group-hover:text-primary transition-colors">
+                                О нас
+                              </span>
+                            </Link>
+                            <Link
+                              href="/contacts"
+                              className="group flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-primary/5 transition-all"
+                            >
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                <MapPin className="h-4 w-4 text-primary" />
+                              </div>
+                              <span className="font-medium group-hover:text-primary transition-colors">
+                                Контакты
+                              </span>
+                            </Link>
                           </div>
-                          <div className="flex flex-col space-y-2 text-sm">
+                        </div>
+
+                        <Separator className="bg-primary/10" />
+
+                        <div className="space-y-3 pl-2">
+                          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                            Связаться с нами
+                          </h3>
+                          <div className="flex flex-col space-y-3 rounded-xl w-[95%] bg-primary/5 p-4">
                             <a
                               href="tel:+77272486337"
-                              className="hover:text-primary transition-colors"
+                              className="group flex items-center gap-3"
                             >
-                              +7(727) 248-63-37
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                <Phone className="h-4 w-4 text-primary" />
+                              </div>
+                              <span className="group-hover:text-primary transition-colors">
+                                +7(727) 248-63-37
+                              </span>
                             </a>
                             <a
                               href="tel:+77272480201"
-                              className="hover:text-primary transition-colors"
+                              className="group flex items-center gap-3"
                             >
-                              +7(727) 248-02-01
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                <Phone className="h-4 w-4 text-primary" />
+                              </div>
+                              <span className="group-hover:text-primary transition-colors">
+                                +7(727) 248-02-01
+                              </span>
                             </a>
                             <a
                               href="mailto:info@profdez.kz"
-                              className="hover:text-primary transition-colors"
+                              className="group flex items-center gap-3"
                             >
-                              info@profdez.kz
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                <Mail className="h-4 w-4 text-primary" />
+                              </div>
+                              <span className="group-hover:text-primary transition-colors">
+                                info@profdez.kz
+                              </span>
                             </a>
                           </div>
                         </div>
+
+                        <Separator className="bg-primary/10" />
                       </div>
                     </SheetContent>
                   </Sheet>

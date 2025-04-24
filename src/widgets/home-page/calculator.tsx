@@ -18,8 +18,10 @@ import { Slider } from "@/components/ui/slider";
 
 import pharmacy from "@/assets/pharmacy.webp";
 import { useContactFormStore } from "@/entities/contact-form/store/use-contact-form";
+import { useIsMobile } from "@/components/ui/sidebar";
 
 export function DisinfectantCalculator() {
+  const isMobile = useIsMobile();
   const { openContactForm } = useContactFormStore();
   const [area, setArea] = useState<number>(50);
   const [consumptionRate, setConsumptionRate] = useState<number>(150);
@@ -40,47 +42,51 @@ export function DisinfectantCalculator() {
 
   return (
     <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 shadow-md">
-      <div className="container w-full relative z-10 mx-auto px-4 py-8 md:py-12">
-        <div className="flex items-center gap-2 mb-6">
-          <Calculator className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+      <div className="container w-full relative z-10 mx-auto px-4 py-6 md:py-12">
+        <div className="flex items-center gap-2 mb-4 md:mb-6">
+          <h2 className="text-xl font-bold tracking-tight md:text-3xl">
             Калькулятор дезинфицирующих средств
           </h2>
         </div>
 
-        <div className="grid items-start gap-8">
-          <div className="space-y-6">
-            <p className="text-muted-foreground">
+        <div className="grid items-start gap-6">
+          <div className="space-y-4 md:space-y-6">
+            <p className="text-sm md:text-base text-muted-foreground">
               Рассчитайте необходимое количество дезинфицирующего средства для
               обработки поверхностей на основе площади, нормы расхода и
               концентрации.
             </p>
-            <div className="relative rounded-xl h-[450px] w-full overflow-hidden mt-6 aspect-video">
+            <div className="relative rounded-xl h-[200px] sm:h-[300px] md:h-[450px] w-full overflow-hidden mt-4 md:mt-6 aspect-video">
               <Image
-                src={pharmacy}
+                src={pharmacy || "/placeholder.svg"}
                 alt="Помещение для дезинфекции"
                 fill
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                <p className="text-white text-sm">
+                <p className="text-white text-xs md:text-sm">
                   Пример помещения для расчета дезинфекции
                 </p>
               </div>
             </div>
-            <div className="w-full flex justify-between items-start gap-4">
+
+            {/* Responsive layout - stack on mobile, side by side on desktop */}
+            <div className="w-full flex flex-col md:flex-row justify-between items-start gap-4">
               <Card className="w-full border border-border/50 bg-card/80 backdrop-blur-sm">
-                <CardContent className="pt-6 pb-4">
-                  <div className="grid gap-6">
-                    <div className="space-y-4">
+                <CardContent className="pt-4 md:pt-6 pb-4">
+                  <div className="grid gap-4 md:gap-6">
+                    <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Ruler className="h-4 w-4 text-primary" />
-                          <Label htmlFor="area">
-                            Площадь обрабатываемых поверхностей (S), м²
+                          <Label
+                            htmlFor="area"
+                            className="text-sm md:text-base"
+                          >
+                            Площадь поверхностей (S), м²
                           </Label>
                         </div>
-                        <span className="text-lg font-medium text-primary">
+                        <span className="text-base md:text-lg font-medium text-primary">
                           {area}
                         </span>
                       </div>
@@ -97,19 +103,22 @@ export function DisinfectantCalculator() {
                         type="number"
                         value={area}
                         onChange={(e) => setArea(Number(e.target.value))}
-                        className="mt-2"
+                        className="mt-1 md:mt-2 h-9"
                       />
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Droplets className="h-4 w-4 text-primary" />
-                          <Label htmlFor="consumptionRate">
-                            Норма расхода рабочего раствора на 1 м² (мл)
+                          <Label
+                            htmlFor="consumptionRate"
+                            className="text-sm md:text-base"
+                          >
+                            Норма расхода на 1 м² (мл)
                           </Label>
                         </div>
-                        <span className="text-lg font-medium text-primary">
+                        <span className="text-base md:text-lg font-medium text-primary">
                           {consumptionRate}
                         </span>
                       </div>
@@ -128,19 +137,22 @@ export function DisinfectantCalculator() {
                         onChange={(e) =>
                           setConsumptionRate(Number(e.target.value))
                         }
-                        className="mt-2"
+                        className="mt-1 md:mt-2 h-9"
                       />
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Repeat className="h-4 w-4 text-primary" />
-                          <Label htmlFor="cleaningFrequency">
+                          <Label
+                            htmlFor="cleaningFrequency"
+                            className="text-sm md:text-base"
+                          >
                             Кратность уборок в день
                           </Label>
                         </div>
-                        <span className="text-lg font-medium text-primary">
+                        <span className="text-base md:text-lg font-medium text-primary">
                           {cleaningFrequency}
                         </span>
                       </div>
@@ -161,19 +173,22 @@ export function DisinfectantCalculator() {
                         onChange={(e) =>
                           setCleaningFrequency(Number(e.target.value))
                         }
-                        className="mt-2"
+                        className="mt-1 md:mt-2 h-9"
                       />
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-primary" />
-                          <Label htmlFor="daysPerMonth">
+                          <Label
+                            htmlFor="daysPerMonth"
+                            className="text-sm md:text-base"
+                          >
                             Количество дней в месяце
                           </Label>
                         </div>
-                        <span className="text-lg font-medium text-primary">
+                        <span className="text-base md:text-lg font-medium text-primary">
                           {daysPerMonth}
                         </span>
                       </div>
@@ -192,19 +207,22 @@ export function DisinfectantCalculator() {
                         onChange={(e) =>
                           setDaysPerMonth(Number(e.target.value))
                         }
-                        className="mt-2"
+                        className="mt-1 md:mt-2 h-9"
                       />
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Percent className="h-4 w-4 text-primary" />
-                          <Label htmlFor="concentration">
-                            Концентрация рабочего раствора (K), %
+                          <Label
+                            htmlFor="concentration"
+                            className="text-sm md:text-base"
+                          >
+                            Концентрация раствора (K), %
                           </Label>
                         </div>
-                        <span className="text-lg font-medium text-primary">
+                        <span className="text-base md:text-lg font-medium text-primary">
                           {concentration}%
                         </span>
                       </div>
@@ -224,29 +242,32 @@ export function DisinfectantCalculator() {
                           setConcentration(Number(e.target.value))
                         }
                         step="0.1"
-                        className="mt-2"
+                        className="mt-1 md:mt-2 h-9"
                       />
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="w-full border border-border/50 bg-card/90 backdrop-blur-sm shadow-lg">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xl text-primary">
+
+              <Card className="w-full mt-4 md:mt-0 border border-border/50 bg-card/90 backdrop-blur-sm shadow-lg">
+                <CardHeader className="pb-1 md:pb-2 pt-4 md:pt-6">
+                  <CardTitle className="text-lg md:text-xl text-primary">
                     Результаты расчета
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-8 py-4">
+                  <div className="space-y-6 md:space-y-8 py-2 md:py-4">
                     <div className="space-y-2">
-                      <Label className="text-muted-foreground">
+                      <Label className="text-xs md:text-sm text-muted-foreground">
                         Необходимое количество средства в месяц, мл
                       </Label>
                       <div className="flex items-end gap-2">
-                        <p className="text-4xl font-bold text-primary">
+                        <p className="text-2xl md:text-4xl font-bold text-primary">
                           {Math.round(requiredAmountMl).toLocaleString("ru-RU")}
                         </p>
-                        <span className="text-muted-foreground mb-1">мл</span>
+                        <span className="text-xs md:text-sm text-muted-foreground mb-1">
+                          мл
+                        </span>
                       </div>
                       <div className="h-2 w-full bg-secondary rounded-full overflow-hidden mt-2">
                         <div
@@ -262,17 +283,19 @@ export function DisinfectantCalculator() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-muted-foreground">
+                      <Label className="text-xs md:text-sm text-muted-foreground">
                         Необходимое количество средства в месяц, л
                       </Label>
                       <div className="flex items-end gap-2">
-                        <p className="text-4xl font-bold text-primary">
+                        <p className="text-2xl md:text-4xl font-bold text-primary">
                           {requiredAmountL.toLocaleString("ru-RU", {
                             minimumFractionDigits: 1,
                             maximumFractionDigits: 1,
                           })}
                         </p>
-                        <span className="text-muted-foreground mb-1">л</span>
+                        <span className="text-xs md:text-sm text-muted-foreground mb-1">
+                          л
+                        </span>
                       </div>
                       <div className="h-2 w-full bg-secondary rounded-full overflow-hidden mt-2">
                         <div
@@ -287,8 +310,8 @@ export function DisinfectantCalculator() {
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-border">
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="pt-3 md:pt-4 border-t border-border">
+                      <div className="grid grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
                         <div>
                           <p className="text-muted-foreground">Площадь</p>
                           <p className="font-medium">{area} м²</p>
@@ -318,11 +341,11 @@ export function DisinfectantCalculator() {
               </Card>
             </div>
           </div>
-          <div className="mt-6">
+          <div className="mt-2 md:mt-6">
             <Button
-              className="w-full h-[55px] text-lg"
+              className="w-full h-12 md:h-[55px] text-base md:text-lg"
               onClick={openContactForm}
-              size="lg"
+              size={isMobile ? "default" : "lg"}
             >
               Заказать расчетное количество
             </Button>
