@@ -67,7 +67,7 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
         <Card className="mb-6">
           <CardContent className="p-6">
             <Button asChild variant="ghost" className="mb-4">
-              <Link href="/catalog">
+              <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Вернуться в каталог
               </Link>
@@ -91,7 +91,7 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
       <Card className="mb-8">
         <CardContent className="p-6">
           <Button asChild variant="ghost" className="mb-4">
-            <Link href="/catalog">
+            <Link href="/">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Вернуться в каталог
             </Link>
