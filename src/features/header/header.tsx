@@ -114,7 +114,13 @@ export function Header() {
               <Instagram className="h-4 w-4" />
             </Link>
           </div>
-          <div className="hidden space-x-6 text-sm md:flex">
+          <div className="hidden space-x-6 text-sm md:flex mr-12">
+            <Link
+              href="/catalogue"
+              className="hover:text-primary-foreground/80 transition-colors"
+            >
+              Каталог
+            </Link>
             <Link
               href="/about"
               className="hover:text-primary-foreground/80 transition-colors"

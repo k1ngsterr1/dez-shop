@@ -6,19 +6,41 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Calculator,
   Droplets,
   Ruler,
   Calendar,
   Repeat,
   Percent,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-
-import pharmacy from "@/assets/pharmacy.webp";
+import { motion, AnimatePresence } from "framer-motion";
 import { useContactFormStore } from "@/entities/contact-form/store/use-contact-form";
 import { useIsMobile } from "@/components/ui/sidebar";
+
+// Define facility types with their images and titles
+const facilityTypes = [
+  {
+    id: "pharmacy",
+    title: "АПТЕКА",
+    description: "Помещение аптеки для расчета дезинфекции",
+    image: "/pharmacy.webp",
+  },
+  {
+    id: "dental",
+    title: "Стоматологический кабинет",
+    description: "Стоматологический кабинет для расчета дезинфекции",
+    image: "/dentist.webp",
+  },
+  {
+    id: "hospital",
+    title: "Больница",
+    description: "Больничное помещение для расчета дезинфекции",
+    image: "/hospital.webp",
+  },
+];
 
 export function DisinfectantCalculator() {
   const isMobile = useIsMobile();
@@ -31,6 +53,10 @@ export function DisinfectantCalculator() {
   const [requiredAmountMl, setRequiredAmountMl] = useState<number>(0);
   const [requiredAmountL, setRequiredAmountL] = useState<number>(0);
 
+  // State for image swiper
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [direction, setDirection] = useState<number>(0);
+
   // Calculate results whenever any input changes
   useEffect(() => {
     const totalSolutionNeeded =
@@ -39,6 +65,44 @@ export function DisinfectantCalculator() {
     setRequiredAmountMl(amountMl);
     setRequiredAmountL(amountMl / 1000);
   }, [area, consumptionRate, cleaningFrequency, daysPerMonth, concentration]);
+
+  // Function to navigate to the next image
+  const nextImage = () => {
+    setDirection(1);
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === facilityTypes.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  // Function to navigate to the previous image
+  const prevImage = () => {
+    setDirection(-1);
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? facilityTypes.length - 1 : prevIndex - 1
+    );
+  };
+
+  // Animation variants for the image swiper
+  const variants = {
+    enter: (direction: number) => {
+      return {
+        x: direction > 0 ? 1000 : -1000,
+        opacity: 0,
+      };
+    },
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => {
+      return {
+        zIndex: 0,
+        x: direction < 0 ? 1000 : -1000,
+        opacity: 0,
+      };
+    },
+  };
 
   return (
     <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 shadow-md">
@@ -56,17 +120,79 @@ export function DisinfectantCalculator() {
               обработки поверхностей на основе площади, нормы расхода и
               концентрации.
             </p>
+
+            {/* Image Swiper */}
             <div className="relative rounded-xl h-[200px] sm:h-[300px] md:h-[450px] w-full overflow-hidden mt-4 md:mt-6 aspect-video">
-              <Image
-                src={pharmacy || "/placeholder.svg"}
-                alt="Помещение для дезинфекции"
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                <p className="text-white text-xs md:text-sm">
-                  Пример помещения для расчета дезинфекции
-                </p>
+              <div className="absolute inset-0 flex items-center justify-between z-20 px-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40"
+                  onClick={prevImage}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                  <span className="sr-only">Предыдущее изображение</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40"
+                  onClick={nextImage}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                  <span className="sr-only">Следующее изображение</span>
+                </Button>
+              </div>
+
+              <AnimatePresence initial={false} custom={direction}>
+                <motion.div
+                  key={currentImageIndex}
+                  custom={direction}
+                  variants={variants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{
+                    x: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 },
+                  }}
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={
+                      facilityTypes[currentImageIndex].image ||
+                      "/placeholder.svg"
+                    }
+                    alt={facilityTypes[currentImageIndex].title}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col items-start justify-end p-4">
+                    <h3 className="text-white text-lg md:text-xl font-medium mb-1">
+                      {facilityTypes[currentImageIndex].title}
+                    </h3>
+                    <p className="text-white text-xs md:text-sm">
+                      {facilityTypes[currentImageIndex].description}
+                    </p>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Image indicators */}
+              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2 z-20">
+                {facilityTypes.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`w-2 h-2 rounded-full ${
+                      index === currentImageIndex ? "bg-white" : "bg-white/40"
+                    }`}
+                    onClick={() => {
+                      setDirection(index > currentImageIndex ? 1 : -1);
+                      setCurrentImageIndex(index);
+                    }}
+                    aria-label={`Перейти к изображению ${index + 1}`}
+                  />
+                ))}
               </div>
             </div>
 
