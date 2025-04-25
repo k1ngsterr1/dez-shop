@@ -18,6 +18,7 @@ import {
   Mail,
   Users2,
   MapPin,
+  ShoppingBag,
 } from "lucide-react";
 import {
   Sheet,
@@ -297,6 +298,17 @@ export function Header() {
                               </div>
                               <span className="font-medium group-hover:text-primary transition-colors">
                                 О нас
+                              </span>
+                            </Link>
+                            <Link
+                              href="/about"
+                              className="group flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-primary/5 transition-all"
+                            >
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                <ShoppingBag className="h-4 w-4 text-primary" />
+                              </div>
+                              <span className="font-medium group-hover:text-primary transition-colors">
+                                Каталог
                               </span>
                             </Link>
                             <Link
