@@ -51,7 +51,7 @@ export function HeroSection() {
                 : "opacity-0 -translate-x-8"
             }`}
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold tracking-tight mb-4 md:mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-5xl font-bold tracking-tight mb-4 md:mb-6 leading-tight">
               <span className="block bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/90">
                 Профессиональные
               </span>

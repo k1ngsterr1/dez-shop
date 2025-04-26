@@ -42,7 +42,7 @@ export function Footer() {
           </div>
           <div>
             <span className="mb-4 text-lg font-bold">Информация</span>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 !mt-2 text-sm">
               <li>
                 <Link
                   href="/about"
@@ -53,17 +53,17 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/faq"
+                  href="/contacts"
                   className="text-muted-foreground hover:text-primary"
                 >
-                  Часто задаваемые вопросы
+                  Контакты
                 </Link>
               </li>
             </ul>
           </div>
           <div>
             <span className="mb-4 text-lg font-bold">Контакты</span>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-3 !mt-2 text-sm">
               <li className="flex items-start">
                 <Phone className="mr-2 mt-0.5 h-4 w-4 text-primary" />
                 <div>

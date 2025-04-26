@@ -164,21 +164,6 @@ export function AboutBlock() {
           </div>
         </div>
       </div>
-
-      {/* CTA Section */}
-      <div className="rounded-lg bg-primary/10 p-8 text-center">
-        <h2 className="mb-4 text-2xl font-bold">Станьте нашим партнером</h2>
-        <p className="mx-auto mb-6 max-w-2xl text-muted-foreground">
-          Мы всегда открыты для новых партнерских отношений и готовы предложить
-          выгодные условия сотрудничества
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Button size="lg">Связаться с нами</Button>
-          <Button variant="outline" size="lg">
-            Скачать каталог
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }
