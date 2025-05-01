@@ -19,6 +19,7 @@ import {
   Users2,
   MapPin,
   ShoppingBag,
+  Calculator,
 } from "lucide-react";
 import {
   Sheet,
@@ -100,12 +101,6 @@ export function Header() {
               href="#"
               className="hover:text-primary-foreground/80 transition-colors"
             >
-              <Twitter className="h-4 w-4" />
-            </Link>
-            <Link
-              href="#"
-              className="hover:text-primary-foreground/80 transition-colors"
-            >
               <Facebook className="h-4 w-4" />
             </Link>
             <Link
@@ -133,6 +128,12 @@ export function Header() {
               className="hover:text-primary-foreground/80 transition-colors"
             >
               Контакты
+            </Link>
+            <Link
+              href="/calculator"
+              className="hover:text-primary-foreground/80 transition-colors"
+            >
+              Калькулятор
             </Link>
           </div>
           <div className="flex items-center space-x-6 text-sm">
@@ -222,7 +223,8 @@ export function Header() {
                                 <Image
                                   src={
                                     product.image ||
-                                    "/placeholder.svg?height=48&width=48&query=product"
+                                    "/placeholder.svg?height=48&width=48&query=product" ||
+                                    "/placeholder.svg"
                                   }
                                   alt={product.name}
                                   width={48}
@@ -320,6 +322,17 @@ export function Header() {
                               </div>
                               <span className="font-medium group-hover:text-primary transition-colors">
                                 Контакты
+                              </span>
+                            </Link>
+                            <Link
+                              href="/calculator"
+                              className="group flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-primary/5 transition-all"
+                            >
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                <Calculator className="h-4 w-4 text-primary" />
+                              </div>
+                              <span className="font-medium group-hover:text-primary transition-colors">
+                                Калькулятор
                               </span>
                             </Link>
                           </div>

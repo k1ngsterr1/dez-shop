@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,12 +13,15 @@ import {
   Percent,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { motion, AnimatePresence } from "framer-motion";
 import { useContactFormStore } from "@/entities/contact-form/store/use-contact-form";
 import { useIsMobile } from "@/components/ui/sidebar";
+import { useProductsQuery } from "@/entities/product/hooks/query/use-get-products.query";
+import { useOnClickOutside } from "@/hooks/use-click-outside";
 
 // Define facility types with their images and titles
 const facilityTypes = [
@@ -52,6 +55,22 @@ export function DisinfectantCalculator() {
   const [concentration, setConcentration] = useState<number>(2);
   const [requiredAmountMl, setRequiredAmountMl] = useState<number>(0);
   const [requiredAmountL, setRequiredAmountL] = useState<number>(0);
+  const [selectedProduct, setSelectedProduct] = useState<string>("");
+  const { data: products, isLoading: productsLoading } = useProductsQuery();
+
+  const [productSearchTerm, setProductSearchTerm] = useState<string>("");
+  const [showProductDropdown, setShowProductDropdown] =
+    useState<boolean>(false);
+  const productSearchRef = useRef<HTMLDivElement>(null);
+
+  useOnClickOutside(productSearchRef as any, () =>
+    setShowProductDropdown(false)
+  );
+
+  const filteredProducts =
+    products?.filter((product: any) =>
+      product.name.toLowerCase().includes(productSearchTerm.toLowerCase())
+    ) || [];
 
   // State for image swiper
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
@@ -161,6 +180,7 @@ export function DisinfectantCalculator() {
                   <Image
                     src={
                       facilityTypes[currentImageIndex].image ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt={facilityTypes[currentImageIndex].title}
@@ -194,6 +214,85 @@ export function DisinfectantCalculator() {
                   />
                 ))}
               </div>
+            </div>
+
+            {/* Product Selector */}
+            <div className="w-full mb-4 md:mb-6">
+              <Card className="border border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardContent className="pt-4 md:pt-6 pb-4">
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor="product"
+                      className="text-sm md:text-base font-medium"
+                    >
+                      Выберите дезинфицирующее средство
+                    </Label>
+                    <div className="relative" ref={productSearchRef}>
+                      <Input
+                        id="product"
+                        type="text"
+                        placeholder="Введите название продукта"
+                        value={productSearchTerm}
+                        onChange={(e) => {
+                          setProductSearchTerm(e.target.value);
+                          setShowProductDropdown(true);
+                        }}
+                        onFocus={() => {
+                          if (productSearchTerm) setShowProductDropdown(true);
+                        }}
+                        className="w-full"
+                      />
+
+                      {showProductDropdown && (
+                        <div className="absolute z-50 w-full mt-1 max-h-[200px] overflow-y-auto rounded-md border bg-background shadow-md">
+                          {productsLoading ? (
+                            <div className="flex items-center justify-center p-4">
+                              <Loader2 className="h-5 w-5 animate-spin text-primary mr-2" />
+                              <span>Загрузка...</span>
+                            </div>
+                          ) : filteredProducts.length > 0 ? (
+                            <div className="py-2">
+                              {filteredProducts.map((product: any) => (
+                                <div
+                                  key={product.id}
+                                  className="flex items-center gap-3 px-4 py-2 hover:bg-accent cursor-pointer"
+                                  onClick={() => {
+                                    setSelectedProduct(product.id);
+                                    setProductSearchTerm(product.name);
+                                    setShowProductDropdown(false);
+                                  }}
+                                >
+                                  <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-md border">
+                                    <Image
+                                      src={
+                                        product.image ||
+                                        "/placeholder.svg?height=32&width=32&query=product"
+                                      }
+                                      alt={product.name}
+                                      width={32}
+                                      height={32}
+                                      className="h-full w-full object-cover object-center"
+                                    />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">
+                                      {product.name}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="p-4 text-center text-sm text-muted-foreground">
+                              Ничего не найдено
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Responsive layout - stack on mobile, side by side on desktop */}
@@ -438,6 +537,18 @@ export function DisinfectantCalculator() {
 
                     <div className="pt-3 md:pt-4 border-t border-border">
                       <div className="grid grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
+                        {selectedProduct && products && (
+                          <div className="col-span-2 mb-2">
+                            <p className="text-muted-foreground">
+                              Выбранное средство
+                            </p>
+                            <p className="font-medium">
+                              {products.find(
+                                (p: any) => p.id === selectedProduct
+                              )?.name || "Не выбрано"}
+                            </p>
+                          </div>
+                        )}
                         <div>
                           <p className="text-muted-foreground">Площадь</p>
                           <p className="font-medium">{area} м²</p>
