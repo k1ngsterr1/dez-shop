@@ -6,7 +6,7 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug } = params;
 
   return {
     title: `Категория: ${slug}`,
