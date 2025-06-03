@@ -259,10 +259,12 @@ export default function ProductsPage() {
           <div>
             <p className="text-muted-foreground">Цена:</p>
             <p className="font-medium">
-              {new Intl.NumberFormat("ru-RU", {
-                style: "currency",
-                currency: "RUB",
-              }).format(product.price)}
+              {typeof product.price === "number"
+                ? new Intl.NumberFormat("ru-RU", {
+                    style: "currency",
+                    currency: "RUB",
+                  }).format(product.price)
+                : "Цена не указана"}
             </p>
           </div>
           <div>

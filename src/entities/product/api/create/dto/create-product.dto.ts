@@ -5,5 +5,5 @@ export interface CreateProductDto {
   images: string[];
   isInStock: boolean;
   isPopular?: boolean;
-  price: number;
+  price?: number;
 }

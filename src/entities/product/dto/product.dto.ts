@@ -3,7 +3,7 @@ export interface Product {
   name: string;
   category: string;
   description: string;
-  price: number;
+  price?: number;
   isInStock: boolean;
   isPopular: boolean;
   images: string[];
@@ -17,7 +17,7 @@ export interface ProductFormValues {
   name: string;
   category: string;
   description: string;
-  price: number;
+  price?: number;
   volume: number;
   expiry: string;
   isInStock: boolean;
