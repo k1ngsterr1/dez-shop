@@ -112,8 +112,11 @@ export function ProductSlider() {
                 <div className="p-6">
                   <h3 className="mb-2 text-xl font-bold">{product.name}</h3>
                   <p className="mb-4 text-sm text-muted-foreground">
-                    {product.description ||
-                      `${product.category} - ${product.price} ₽`}
+                    {product.description
+                      ? product.description.length > 400
+                        ? `${product.description.slice(0, 400)}...`
+                        : product.description
+                      : `${product.category} - ${product.price} ₽`}
                   </p>
                   <Button
                     onClick={() => navigate.push(`/product/${product.id}`)}
