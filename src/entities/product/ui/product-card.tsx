@@ -18,7 +18,7 @@ interface IProductCard {
     id: number;
     name: string;
     price: number;
-    image: string;
+    images: string[];
     category: string;
     isNew: boolean;
     isPopular: boolean;
@@ -37,7 +37,7 @@ export const ProductCard: React.FC<IProductCard> = ({ product }) => {
       <div className="relative">
         <div className="relative aspect-square overflow-hidden">
           <Image
-            src={product.image || "/placeholder.svg"}
+            src={product.images[0] || "/placeholder.svg"}
             alt={product.name}
             fill
             className="object-cover transition-transform group-hover:scale-105"
