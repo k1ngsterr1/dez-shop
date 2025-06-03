@@ -39,7 +39,6 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
-// Update the schema to make price optional
 const productFormSchema = z.object({
   name: z.string().min(2, {
     message: "Название должно содержать не менее 2 символов",
@@ -63,7 +62,6 @@ const productFormSchema = z.object({
   isPopular: z.boolean(),
 });
 
-// Define the type for form values
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
 interface ProductFormProps {
@@ -79,20 +77,21 @@ export function ProductForm({
   initialData,
   isEditing = false,
   isSubmitting = false,
-  maxHeight = "70vh", // Default max height
+  maxHeight = "70vh",
 }: ProductFormProps) {
   const [images, setImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [initialFormData, setInitialFormData] =
+    useState<ProductFormValues | null>(null);
   const { data: categories = [] } = useCategoriesQuery();
 
-  // Update the form initialization
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: initialData?.name || "",
       category: initialData?.category || "",
       description: initialData?.description || "",
-      price: initialData?.price || undefined, // Changed from 0 to undefined
+      price: initialData?.price || undefined,
       volume: initialData?.volume?.toString() || "",
       expiry: initialData?.expiry || "",
       isInStock:
@@ -102,12 +101,25 @@ export function ProductForm({
     },
   });
 
-  // Set initial images if editing
+  // Store initial form data for comparison
   useEffect(() => {
-    if (initialData?.images) {
-      setImageUrls(initialData.images);
+    if (initialData && isEditing) {
+      const initial = {
+        name: initialData.name || "",
+        category: initialData.category || "",
+        description: initialData.description || "",
+        price: initialData.price || undefined,
+        volume: initialData.volume?.toString() || "",
+        expiry: initialData.expiry || "",
+        isInStock:
+          initialData.isInStock !== undefined ? initialData.isInStock : true,
+        isPopular:
+          initialData.isPopular !== undefined ? initialData.isPopular : false,
+      };
+      setInitialFormData(initial);
+      setImageUrls(initialData.images || []);
     }
-  }, [initialData]);
+  }, [initialData, isEditing]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -117,7 +129,6 @@ export function ProductForm({
     const newUrls: string[] = [];
 
     Array.from(files).forEach((file) => {
-      // Validate file size and type
       if (file.size > MAX_FILE_SIZE) {
         console.error(`File ${file.name} is too large. Max size is 5MB.`);
         return;
@@ -141,7 +152,6 @@ export function ProductForm({
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
 
-    // Only revoke if it's a blob URL (not an existing image URL)
     if (imageUrls[index].startsWith("blob:")) {
       URL.revokeObjectURL(imageUrls[index]);
     }
@@ -149,9 +159,29 @@ export function ProductForm({
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Update the handleFormSubmit function to use the expiry string directly
+  // Helper function to compare values and detect changes
+  const hasFieldChanged = (
+    fieldName: keyof ProductFormValues,
+    currentValue: any
+  ) => {
+    if (!isEditing || !initialFormData) return true;
+
+    const initialValue = initialFormData[fieldName];
+
+    // Handle undefined/empty string comparison
+    if (
+      (initialValue === undefined || initialValue === "") &&
+      (currentValue === undefined || currentValue === "")
+    ) {
+      return false;
+    }
+
+    return initialValue !== currentValue;
+  };
+
   const handleFormSubmit = async (data: ProductFormValues) => {
-    if (images.length === 0 && imageUrls.length === 0) {
+    // For new products, require at least one image
+    if (!isEditing && images.length === 0 && imageUrls.length === 0) {
       form.setError("root", {
         message: "Добавьте хотя бы одно изображение продукта",
       });
@@ -159,38 +189,53 @@ export function ProductForm({
     }
 
     try {
-      // Create FormData to handle file uploads
       const formData = new FormData();
 
-      // Add all form fields to FormData
-      Object.entries(data).forEach(([key, value]) => {
-        // Only append if value is defined
-        if (value !== undefined) {
-          formData.append(key, value.toString());
-        }
-      });
-
-      // Add image files to FormData
-      images.forEach((file) => {
-        formData.append("images", file);
-      });
-
-      // When updating, we'll send the current image URLs as a JSON string
       if (isEditing) {
-        // Filter out blob URLs (new images) and only include existing URLs from the server
-        const existingImageUrls = imageUrls.filter(
-          (url) => !url.startsWith("blob:")
-        );
+        // Only add changed fields for editing
+        Object.entries(data).forEach(([key, value]) => {
+          if (
+            value !== undefined &&
+            hasFieldChanged(key as keyof ProductFormValues, value)
+          ) {
+            formData.append(key, value.toString());
+          }
+        });
 
-        // Add as a single JSON field instead of multiple fields
-        if (existingImageUrls.length > 0) {
-          formData.append("imageUrls", JSON.stringify(existingImageUrls));
+        // Only add new images (File objects), not existing URLs
+        if (images.length > 0) {
+          images.forEach((file) => {
+            formData.append("images", file);
+          });
         }
+
+        // Check if we have any changes to send
+        const hasChanges =
+          Array.from(formData.keys()).length > 0 || images.length > 0;
+
+        if (!hasChanges) {
+          form.setError("root", {
+            message: "Нет изменений для сохранения",
+          });
+          return;
+        }
+      } else {
+        // For new products, add all fields
+        Object.entries(data).forEach(([key, value]) => {
+          if (value !== undefined) {
+            formData.append(key, value.toString());
+          }
+        });
+
+        // Add all images for new products
+        images.forEach((file) => {
+          formData.append("images", file);
+        });
       }
 
       await onSubmit({
         formData,
-        name: data.name, // Add name for toast message in the parent component
+        name: data.name,
       });
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -320,14 +365,10 @@ export function ProductForm({
                   <div className="grid grid-cols-2 gap-4 mt-4 sm:grid-cols-3 md:grid-cols-4">
                     {imageUrls.map((url, index) => (
                       <div key={index} className="relative group">
-                        <div
-                          key={index}
-                          className="overflow-hidden rounded-lg aspect-square bg-muted"
-                        >
+                        <div className="overflow-hidden rounded-lg aspect-square bg-muted">
                           <Image
                             width={100}
                             height={100}
-                            key={index}
                             src={url || "/placeholder.svg"}
                             alt={`Product image ${index + 1}`}
                             className="object-cover w-full h-full"
@@ -484,8 +525,7 @@ export function ProductForm({
             </div>
           </div>
 
-          {/* Fixed footer with submit button */}
-          <DialogFooter className="mt-6 pt-4 border-t  bg-background">
+          <DialogFooter className="mt-6 pt-4 border-t bg-background">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting && (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
