@@ -94,7 +94,7 @@ export function ProductSlider() {
                 <div className="relative aspect-[2/1] w-full overflow-hidden rounded-t-lg">
                   <Image
                     src={
-                      product.image ||
+                      product.images[0] ||
                       "/placeholder.svg?height=400&width=800" ||
                       "/placeholder.svg"
                     }
