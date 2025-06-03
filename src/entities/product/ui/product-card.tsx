@@ -60,7 +60,7 @@ export const ProductCard: React.FC<IProductCard> = ({ product }) => {
       </div>
 
       <CardHeader className="p-4 pb-0">
-        <Link href={`/products/${product.id}`} className="hover:underline">
+        <Link href={`/product/${product.id}`} className="hover:underline">
           <h3 className="line-clamp-2 min-h-[3rem] text-lg font-medium">
             {product.name}
           </h3>

@@ -91,7 +91,7 @@ export function Footer() {
 
         <div className="mt-12 border-t pt-6  text-center text-sm text-muted-foreground">
           <span className="mb-4">
-            Разработка в
+            Разработано в
             <a
               href="https://sparkstudio.kz/"
               target="_blank"
