@@ -39,7 +39,7 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
-// Update the schema to use strings for both volume and expiry
+// Update the schema to make price optional
 const productFormSchema = z.object({
   name: z.string().min(2, {
     message: "Название должно содержать не менее 2 символов",
@@ -52,10 +52,11 @@ const productFormSchema = z.object({
   }),
   price: z.coerce
     .number()
-    .min(0.01, { message: "Цена должна быть больше 0" })
+    .min(0, { message: "Цена не может быть отрицательной" })
     .multipleOf(0.01, {
       message: "Цена должна быть указана с точностью до копеек",
-    }),
+    })
+    .optional(),
   volume: z.string().min(1, { message: "Укажите объем продукта" }),
   expiry: z.string().optional(),
   isInStock: z.boolean(),
@@ -91,7 +92,7 @@ export function ProductForm({
       name: initialData?.name || "",
       category: initialData?.category || "",
       description: initialData?.description || "",
-      price: initialData?.price || 0,
+      price: initialData?.price || undefined, // Changed from 0 to undefined
       volume: initialData?.volume?.toString() || "",
       expiry: initialData?.expiry || "",
       isInStock:
@@ -163,7 +164,10 @@ export function ProductForm({
 
       // Add all form fields to FormData
       Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value.toString());
+        // Only append if value is defined
+        if (value !== undefined) {
+          formData.append(key, value.toString());
+        }
       });
 
       // Add image files to FormData
@@ -356,7 +360,7 @@ export function ProductForm({
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Цена</FormLabel>
+                      <FormLabel>Цена (необязательно)</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
@@ -369,9 +373,21 @@ export function ProductForm({
                             placeholder="0.00"
                             className="pl-8"
                             {...field}
+                            value={field.value === undefined ? "" : field.value}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              field.onChange(
+                                value === ""
+                                  ? undefined
+                                  : Number.parseFloat(value)
+                              );
+                            }}
                           />
                         </div>
                       </FormControl>
+                      <FormDescription>
+                        Оставьте пустым, если цена не определена
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
