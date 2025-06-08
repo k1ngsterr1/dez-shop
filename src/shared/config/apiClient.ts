@@ -1,6 +1,6 @@
 import axios from "axios";
-const BASE_URL = "http://localhost:6001";
-// const BASE_URL = "https://profdez.kz";
+// const BASE_URL = "http://localhost:6001";
+const BASE_URL = "https://profdez.kz";
 // Create an Axios instance with default configuration
 export const apiClient = axios.create({
   baseURL: BASE_URL,
