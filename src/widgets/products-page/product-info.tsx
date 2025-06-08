@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import type { Product, Item } from "@/entities/product/dto/product.dto";
-import { formatPrice } from "@/lib/format-price";
+import { formatPrice } from "@/lib/format-price"; // This will now use the updated function
 import { Check } from "lucide-react";
 
 interface ProductInfoProps {
@@ -46,7 +46,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 
   useEffect(() => {
     if (items.length > 0) {
-      setSelectedItem(items[0]); // Default to the first item
+      setSelectedItem(items[0]);
     } else {
       setSelectedItem(null);
     }
@@ -57,7 +57,6 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
     setSelectedItem(newItem);
   };
 
-  // Determine the item to display: selectedItem if available, otherwise the first item if only one exists.
   const displayItem = items.length === 1 ? items[0] : selectedItem;
 
   return (
@@ -78,13 +77,13 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
         )}
       </div>
 
-      {items.length > 1 && ( // Only show select if there are MORE than one item
+      {items.length > 1 && (
         <div className="space-y-2">
           <Label htmlFor="item-select" className="text-sm font-medium">
             Выберите объем:
           </Label>
           <Select
-            value={selectedItem?.volume || ""} // selectedItem will be items[0] initially if items.length > 1
+            value={selectedItem?.volume || ""}
             onValueChange={handleItemChange}
           >
             <SelectTrigger id="item-select" className="w-full md:w-[200px]">
@@ -103,6 +102,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 
       {displayItem ? (
         <div className="flex items-baseline gap-2">
+          {/* The formatPrice function will now apply the dot separator */}
           <span className="text-3xl font-bold text-primary">
             {formatPrice(displayItem.price)}
           </span>
