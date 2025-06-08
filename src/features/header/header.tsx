@@ -98,13 +98,15 @@ export function Header() {
         <div className="container w-full mx-auto flex items-center justify-between px-4">
           <div className="flex items-center space-x-4">
             <Link
-              href="#"
+              href="https://www.facebook.com/prof.dez.2025/"
+              target="_blank"
               className="hover:text-primary-foreground/80 transition-colors"
             >
               <Facebook className="h-4 w-4" />
             </Link>
             <Link
-              href="#"
+              href="https://www.instagram.com/profdez.kz/"
+              target="_blank"
               className="hover:text-primary-foreground/80 transition-colors"
             >
               <Instagram className="h-4 w-4" />

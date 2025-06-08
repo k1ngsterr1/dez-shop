@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import main from "@/assets/main.webp";
 import { Droplets, Shield, Sparkles, CheckCircle } from "lucide-react";
 import { useIsMobile } from "@/components/ui/sidebar";
+import { useContactFormStore } from "@/entities/contact-form/store/use-contact-form";
 
 export function HeroSection() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const { openContactForm } = useContactFormStore();
+
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -67,8 +70,9 @@ export function HeroSection() {
             <div className="flex flex-wrap gap-4 mb-6 md:mb-10">
               <Button
                 variant="outline"
+                onClick={openContactForm}
                 size={isMobile ? "default" : "lg"}
-                className="rounded-full md:h-14 md:px-8 text-sm md:text-base"
+                className="rounded-full cursor-pointer hover:bg-primary hover:text-white md:h-14 md:px-8 text-sm md:text-base"
               >
                 Связаться с нами
               </Button>

@@ -45,21 +45,18 @@ export function ContactsBlock() {
           <ul className="space-y-3">
             <li className="flex items-center">
               <Phone className="mr-2 h-4 w-4 text-primary" />
-              <a href="tel:+77272486337" className="hover:text-primary">
-                +7(727) 248-63-37
+              <a href="tel:+77000246777" className="hover:text-primary">
+                +7 700 024 67 77
               </a>
             </li>
             <li className="flex items-center">
               <Phone className="mr-2 h-4 w-4 text-primary" />
-              <a href="tel:+77272480201" className="hover:text-primary">
-                +7(727) 248-02-01
+              <a href="tel:+77003234707" className="hover:text-primary">
+                +7 700 323 47 07
               </a>
-            </li>
-            <li className="flex items-center">
-              <Phone className="mr-2 h-4 w-4 text-primary" />
-              <a href="tel:+77017778899" className="hover:text-primary">
-                +7(701) 777-88-99
-              </a>
+              <span className="ml-2 text-sm text-muted-foreground">
+                (отдел продаж)
+              </span>
             </li>
           </ul>
         </ContactCard>
@@ -68,23 +65,11 @@ export function ContactsBlock() {
           <ul className="space-y-3">
             <li className="flex items-center">
               <Mail className="mr-2 h-4 w-4 text-primary" />
-              <a href="mailto:info@profdez.kz" className="hover:text-primary">
-                info@profdez.kz
-              </a>
-            </li>
-            <li className="flex items-center">
-              <Mail className="mr-2 h-4 w-4 text-primary" />
-              <a href="mailto:sales@profdez.kz" className="hover:text-primary">
-                sales@profdez.kz
-              </a>
-            </li>
-            <li className="flex items-center">
-              <Mail className="mr-2 h-4 w-4 text-primary" />
               <a
-                href="mailto:support@profdez.kz"
+                href="mailto:vitaliy@vmpharm.net"
                 className="hover:text-primary"
               >
-                support@profdez.kz
+                vitaliy@vmpharm.net
               </a>
             </li>
           </ul>
@@ -120,9 +105,11 @@ export function ContactsBlock() {
           <div className="flex items-start">
             <MapPin className="mr-2 mt-0.5 h-4 w-4 text-primary" />
             <div>
-              <p>г. Алматы, ул. Примерная, 123</p>
+              <p className="font-medium">Казахстан, г. Алматы</p>
+              <p>ул. Затаевича, 49</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Бизнес-центр Название, 4 этаж, офис 405
+                Юридический адрес: Проспект Сейфуллина, дом 404/67, офис 312,
+                корпус 1
               </p>
             </div>
           </div>
@@ -131,12 +118,12 @@ export function ContactsBlock() {
         <ContactCard icon={Building} title="Реквизиты">
           <ul className="space-y-2 text-sm">
             <li>
-              <span className="font-medium">ТОО ProfDez Kazakhstan</span>
+              <span className="font-medium">ТОО «Проф Дез KZ»</span>
             </li>
-            <li>БИН: 123456789012</li>
-            <li>ИИК: KZ123456789012345678</li>
-            <li>БИК: ABCDEFGH</li>
-            <li>Банк: АО Название Банка</li>
+            <li>БИН: 151140014055</li>
+            <li>ИИК: KZ306017131000012151</li>
+            <li>БИК: HSBKKZKX</li>
+            <li>Банк: АО «Народный банк Казахстана»</li>
           </ul>
         </ContactCard>
 
@@ -144,20 +131,14 @@ export function ContactsBlock() {
           <ul className="space-y-3">
             <li className="flex flex-col">
               <span className="font-medium">Отдел продаж:</span>
-              <a href="tel:+77272486337" className="hover:text-primary">
-                +7(727) 248-63-37
+              <a href="tel:+77003234707" className="hover:text-primary">
+                +7 700 323 47 07
               </a>
             </li>
             <li className="flex flex-col">
-              <span className="font-medium">Бухгалтерия:</span>
-              <a href="tel:+77272480201" className="hover:text-primary">
-                +7(727) 248-02-01
-              </a>
-            </li>
-            <li className="flex flex-col">
-              <span className="font-medium">Техническая поддержка:</span>
-              <a href="tel:+77017778899" className="hover:text-primary">
-                +7(701) 777-88-99
+              <span className="font-medium">Основной номер:</span>
+              <a href="tel:+77000246777" className="hover:text-primary">
+                +7 700 024 67 77
               </a>
             </li>
           </ul>
@@ -168,22 +149,20 @@ export function ContactsBlock() {
           <h2 className="mb-6 text-2xl font-bold">Напишите нам</h2>
           <ContactForm />
         </div>
-        <div>
+        <div className="h-full">
           <h2 className="mb-6 text-2xl font-bold">Мы на карте</h2>
-          <div className="overflow-hidden rounded-lg border">
-            <div className="aspect-square w-full lg:aspect-auto lg:h-full">
-              {/* Placeholder for map - in a real implementation, this would be replaced with an actual map component */}
-              <div className="flex h-full w-full items-center justify-center bg-muted/50 p-8 text-center">
-                <div>
-                  <MapPin className="mx-auto mb-4 h-12 w-12 text-primary/50" />
-                  <p className="text-lg font-medium">Карта местоположения</p>
-                  <p className="text-sm text-muted-foreground">
-                    Здесь будет отображаться интерактивная карта с
-                    местоположением офиса компании
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="overflow-hidden h-full rounded-lg border">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2906.3636153859513!2d76.9413!3d43.2567!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38836eb2439005c3%3A0x3588aa2b0a6df7e8!2z0YPQuy4g0JfQsNGC0LDQtdCy0LjRh9CwIDQ5LCDQkNC70LzQsNGC0YsgMDUwMDAw!5e0!3m2!1sru!2skz!4v1717930216123!5m2!1sru!2skz"
+              width="100%"
+              height="450"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Местоположение ТОО «Проф Дез KZ»"
+              className="aspect-square w-full lg:aspect-auto lg:h-full"
+            ></iframe>
           </div>
         </div>
       </div>

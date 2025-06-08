@@ -41,10 +41,10 @@ export function ProductSlider() {
         <div className="aspect-[2/1] w-full">
           <Skeleton className="h-full w-full rounded-t-lg" />
         </div>
-        <div className="p-6">
-          <Skeleton className="h-8 w-3/4 mb-2" />
-          <Skeleton className="h-4 w-full mb-4" />
-          <Skeleton className="h-10 w-32" />
+        <div className="p-3">
+          <Skeleton className="h-6 w-3/4 mb-2" />
+          <Skeleton className="h-3 w-full mb-3" />
+          <Skeleton className="h-8 w-24" />
         </div>
       </div>
     );
@@ -91,35 +91,38 @@ export function ProductSlider() {
           {products.map((product: any) => (
             <CarouselItem key={product.id}>
               <div className="relative">
-                <div className="relative aspect-[2/1] w-full overflow-hidden rounded-t-lg">
+                <div className="relative aspect-[2/1] w-full overflow-hidden rounded-t-lg bg-gray-50">
                   <Image
                     src={
                       product.images[0] ||
-                      "/placeholder.svg?height=400&width=800" ||
+                      "/placeholder.svg?height=300&width=600" ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt={product.name}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     priority
                   />
                 </div>
                 {getBadgeText(product) && (
-                  <Badge className="absolute right-4 top-4 bg-primary">
+                  <Badge className="absolute right-3 top-3 bg-primary text-xs">
                     {getBadgeText(product)}
                   </Badge>
                 )}
-                <div className="p-6">
-                  <h3 className="mb-2 text-xl font-bold">{product.name}</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">
+                <div className="p-3">
+                  <h3 className="mb-1 text-base font-bold">{product.name}</h3>
+                  <p className="mb-2 text-xs text-muted-foreground line-clamp-2">
                     {product.description
-                      ? product.description.length > 400
-                        ? `${product.description.slice(0, 400)}...`
+                      ? product.description.length > 200
+                        ? `${product.description.slice(0, 200)}...`
                         : product.description
                       : `${product.category} - ${product.price} ₽`}
                   </p>
                   <Button
+                    size="sm"
                     onClick={() => navigate.push(`/product/${product.id}`)}
+                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                   >
                     Подробнее
                   </Button>
@@ -128,15 +131,17 @@ export function ProductSlider() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-4" />
-        <CarouselNext className="right-4" />
+        <CarouselPrevious className="left-2" />
+        <CarouselNext className="right-2" />
       </Carousel>
-      <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2 p-2">
+      <div className="absolute bottom-1 left-0 right-0 flex justify-center space-x-1 p-1">
         {products.slice(0, 10).map((_: number, index: number) => (
           <span
             key={index}
-            className={`block h-2 w-2 rounded-full ${
-              currentSlide === index ? "bg-primary" : "bg-muted"
+            className={`block h-1.5 w-1.5 rounded-full cursor-pointer transition-colors duration-200 ${
+              currentSlide === index
+                ? "bg-primary"
+                : "bg-muted hover:bg-muted-foreground"
             }`}
             onClick={() => api?.scrollTo(index)}
             role="button"
