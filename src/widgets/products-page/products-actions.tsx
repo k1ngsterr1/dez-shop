@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Truck,
-  ShieldCheck,
-  Clock,
-  FileText,
-  ShoppingCart,
-  Phone,
-} from "lucide-react";
+import { Truck, ShieldCheck, Clock, FileText, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useContactFormStore } from "@/entities/contact-form/store/use-contact-form";
 
@@ -16,7 +9,7 @@ interface ProductActionsProps {
   isInStock: boolean;
 }
 
-export function ProductActions({ expiry, isInStock }: ProductActionsProps) {
+export function ProductActions({ expiry }: ProductActionsProps) {
   const { openContactForm } = useContactFormStore();
 
   return (

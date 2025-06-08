@@ -52,7 +52,6 @@ import type {
 } from "@/entities/product/dto/product.dto";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMobile } from "@/hooks/use-is-mobile";
 
 // Helper to safely parse items and get the first one
 const getFirstItem = (product: Product): Item | null => {
@@ -72,7 +71,6 @@ export default function ProductsPage() {
   const updateProductMutation = useUpdateProductMutation();
   const deleteProductMutation = useDeleteProductMutation();
   const { toast } = useToast();
-  const isMobile = useMobile();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
