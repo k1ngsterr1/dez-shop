@@ -1,7 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
 import { ProductGallery } from "./product-gallery";
-import { ProductInfo } from "./product-info";
 import { ProductTabs } from "./product-tabs";
 import { ProductActions } from "./products-actions";
 import { ProductBreadcrumbs } from "./products-breadcrumbs";
@@ -9,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useProductQuery } from "@/entities/product/hooks/query/use-get-product.query";
+import ProductInfo from "./product-info";
 
 export default function ProductDetailPage() {
   const params = useParams();
