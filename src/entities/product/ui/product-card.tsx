@@ -1,4 +1,5 @@
 "use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,28 +12,51 @@ import { useContactFormStore } from "@/entities/contact-form/store/use-contact-f
 import { formatPrice } from "@/lib/format-price";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import type React from "react";
+import { useMemo } from "react";
+import type { Item } from "../dto/product.dto";
 
 interface IProductCard {
   product: {
     id: number;
     name: string;
-    price: number;
+    // `items` is a JSON string from the backend
+    items: string;
     images: string[];
     category: string;
-    isNew: boolean;
     isPopular: boolean;
     isInStock: boolean;
+    createdAt: Date; // Use createdAt to determine if it's new
   };
 }
+
+// Helper to safely parse items and get the first one
+const getFirstItem = (itemsJson: string): Item | null => {
+  try {
+    if (!itemsJson) return null;
+    const items = JSON.parse(itemsJson);
+    return Array.isArray(items) && items.length > 0 ? items[0] : null;
+  } catch (e) {
+    console.error("Failed to parse product items:", e);
+    return null;
+  }
+};
 
 export const ProductCard: React.FC<IProductCard> = ({ product }) => {
   const { openContactForm } = useContactFormStore();
 
+  const firstItem = useMemo(() => getFirstItem(product.items), [product.items]);
+  // Determine if the product is new (e.g., created in the last 7 days)
+  const isNew = useMemo(() => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return new Date(product.createdAt) > sevenDaysAgo;
+  }, [product.createdAt]);
+
   return (
     <Card
       key={product.id}
-      className="group overflow-hidden transition-all hover:shadow-md"
+      className="group overflow-hidden transition-all hover:shadow-md flex flex-col"
     >
       <div className="relative">
         <div className="relative aspect-square overflow-hidden">
@@ -43,14 +67,12 @@ export const ProductCard: React.FC<IProductCard> = ({ product }) => {
             className="object-cover transition-transform group-hover:scale-105"
           />
         </div>
-        <div className="absolute left-2 top-2">
-          {product.isNew && (
+        <div className="absolute left-2 top-2 flex flex-col gap-2">
+          {isNew && (
             <Badge className="bg-primary text-primary-foreground">
               Новинка
             </Badge>
           )}
-        </div>
-        <div className="absolute right-2 top-2">
           {product.isPopular && (
             <Badge className="bg-accent text-accent-foreground">
               Популярное
@@ -68,11 +90,15 @@ export const ProductCard: React.FC<IProductCard> = ({ product }) => {
         <p className="text-xs text-muted-foreground">{product.category}</p>
       </CardHeader>
 
-      <CardContent className="p-4 pt-2">
+      <CardContent className="p-4 pt-2 flex-grow">
         <div className="flex items-center justify-between">
-          <div className="text-xl font-bold">{formatPrice(product.price)}</div>
+          <div className="text-xl font-bold">
+            {firstItem ? formatPrice(firstItem.price) : "Цена по запросу"}
+          </div>
           {!product.isInStock && (
-            <Badge className="text-white">Нет в наличии</Badge>
+            <Badge variant="secondary" className="text-white">
+              Нет в наличии
+            </Badge>
           )}
         </div>
       </CardContent>

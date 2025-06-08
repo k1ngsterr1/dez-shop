@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Search, Trash2, Pencil, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,10 +48,23 @@ import { useDeleteProductMutation } from "@/entities/product/hooks/mutation/use-
 import type {
   Product,
   ProductWithImages,
+  Item,
 } from "@/entities/product/dto/product.dto";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMobile } from "@/hooks/use-is-mobile";
+
+// Helper to safely parse items and get the first one
+const getFirstItem = (product: Product): Item | null => {
+  try {
+    if (!product.items) return null;
+    const items = JSON.parse(product.items);
+    return Array.isArray(items) && items.length > 0 ? items[0] : null;
+  } catch (e) {
+    console.error(`Failed to parse items for product ${product.id}:`, e);
+    return null;
+  }
+};
 
 export default function ProductsPage() {
   const { data: products = [], isLoading, refetch } = useProductsQuery();
@@ -66,11 +79,15 @@ export default function ProductsPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = useMemo(
+    () =>
+      products.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [products, searchTerm]
   );
 
   const handleAddProduct = async (productData: ProductWithImages) => {
@@ -81,7 +98,7 @@ export default function ProductsPage() {
         description: `Продукт "${productData.name}" успешно добавлен.`,
       });
       setAddDialogOpen(false);
-      refetch(); // Refresh the products list
+      refetch();
     } catch (error) {
       console.error("Error with adding product:", error);
       toast({
@@ -92,7 +109,7 @@ export default function ProductsPage() {
     }
   };
 
-  const handleUpdateProduct = async (productData: any) => {
+  const handleUpdateProduct = async (productData: ProductWithImages) => {
     if (currentProduct) {
       try {
         await updateProductMutation.mutate(currentProduct.id, productData);
@@ -102,7 +119,7 @@ export default function ProductsPage() {
         });
         setEditDialogOpen(false);
         setCurrentProduct(null);
-        refetch(); // Refresh the products list
+        refetch();
       } catch (error) {
         console.error("Error with updating product:", error);
         toast({
@@ -137,7 +154,6 @@ export default function ProductsPage() {
     setEditDialogOpen(true);
   };
 
-  // Skeleton loader component for table rows
   const ProductRowSkeleton = () => (
     <TableRow className="animate-pulse">
       <TableCell>
@@ -146,150 +162,138 @@ export default function ProductsPage() {
           <Skeleton className="h-5 w-[150px]" />
         </div>
       </TableCell>
-      {!isMobile && (
-        <>
-          <TableCell className="hidden md:table-cell">
-            <Skeleton className="h-5 w-[100px]" />
-          </TableCell>
-          <TableCell className="hidden md:table-cell">
-            <Skeleton className="h-5 w-[80px]" />
-          </TableCell>
-          <TableCell className="hidden lg:table-cell">
-            <Skeleton className="h-5 w-[60px]" />
-          </TableCell>
-          <TableCell className="hidden lg:table-cell">
-            <Skeleton className="h-5 w-[100px]" />
-          </TableCell>
-        </>
-      )}
-      <TableCell className="hidden sm:table-cell">
+      <TableCell className="hidden md:table-cell">
+        <Skeleton className="h-5 w-[100px]" />
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
+        <Skeleton className="h-5 w-[80px]" />
+      </TableCell>
+      <TableCell className="hidden lg:table-cell">
+        <Skeleton className="h-5 w-[60px]" />
+      </TableCell>
+      <TableCell>
         <Skeleton className="h-6 w-[90px] rounded-full" />
       </TableCell>
-      <TableCell className="hidden sm:table-cell">
+      <TableCell>
         <Skeleton className="h-5 w-[40px]" />
       </TableCell>
       <TableCell>
         <div className="flex items-center justify-end gap-2">
-          {isMobile ? (
-            <Skeleton className="h-8 w-8 rounded-md" />
-          ) : (
-            <>
-              <Skeleton className="h-8 w-8 rounded-md" />
-              <Skeleton className="h-8 w-8 rounded-md" />
-            </>
-          )}
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
         </div>
       </TableCell>
     </TableRow>
   );
 
-  // Mobile product card component
-  const ProductCard = ({ product }: { product: Product }) => (
-    <Card className="mb-4 sm:hidden">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-md bg-muted overflow-hidden">
-              {product.images.length > 0 ? (
-                <Image
-                  width={100}
-                  height={100}
-                  src={product.images[0] || "/placeholder.svg"}
-                  alt={product.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
-                  Нет фото
-                </div>
-              )}
+  const ProductCardComponent = ({ product }: { product: Product }) => {
+    const firstItem = getFirstItem(product);
+    return (
+      <Card className="mb-4 sm:hidden">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-md bg-muted overflow-hidden">
+                {product.images.length > 0 ? (
+                  <Image
+                    width={100}
+                    height={100}
+                    src={product.images[0] || "/placeholder.svg"}
+                    alt={product.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
+                    Нет фото
+                  </div>
+                )}
+              </div>
+              <div>
+                <h3 className="font-medium">{product.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {product.category}
+                </p>
+              </div>
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Действия</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => openEditDialog(product)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Редактировать
+                </DropdownMenuItem>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Удалить
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Удалить продукт?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Вы уверены, что хотите удалить продукт {product.name}?
+                        Это действие нельзя отменить.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Отмена</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Удалить
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
             <div>
-              <h3 className="font-medium">{product.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                {product.category}
+              <p className="text-muted-foreground">Цена:</p>
+              <p className="font-medium">
+                {firstItem
+                  ? new Intl.NumberFormat("ru-RU", {
+                      style: "currency",
+                      currency: "RUB",
+                    }).format(firstItem.price)
+                  : "Не указана"}
               </p>
             </div>
+            <div>
+              <p className="text-muted-foreground">Объем:</p>
+              <p>{firstItem?.volume || "—"}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Срок годности:</p>
+              <p>{product.expiry || "—"}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Статус:</p>
+              <Badge
+                className="mt-1 !text-white"
+                variant={product.isInStock ? "default" : "secondary"}
+              >
+                {product.isInStock ? "В наличии" : "Нет в наличии"}
+              </Badge>
+            </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Действия</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => openEditDialog(product)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Редактировать
-              </DropdownMenuItem>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Удалить
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Удалить продукт?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Вы уверены, что хотите удалить продукт {product.name}? Это
-                      действие нельзя отменить.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Отмена</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => handleDeleteProduct(product.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Удалить
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <p className="text-muted-foreground">Цена:</p>
-            <p className="font-medium">
-              {typeof product.price === "number"
-                ? new Intl.NumberFormat("ru-RU", {
-                    style: "currency",
-                    currency: "RUB",
-                  }).format(product.price)
-                : "Цена не указана"}
-            </p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Объем:</p>
-            <p>{product.volume || "—"}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Срок годности:</p>
-            <p>{product.expiry || "—"}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Статус:</p>
-            <Badge
-              className="mt-1 !text-white"
-              variant={product.isInStock ? "default" : "secondary"}
-            >
-              {product.isInStock ? "В наличии" : "Нет в наличии"}
-            </Badge>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
-  // Mobile skeleton card
   const ProductCardSkeleton = () => (
     <Card className="mb-4 sm:hidden animate-pulse">
       <CardContent className="p-4">
@@ -370,7 +374,6 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        {/* Mobile view - cards */}
         {isLoading ? (
           Array.from({ length: 3 }).map((_, index) => (
             <ProductCardSkeleton key={`mobile-skeleton-${index}`} />
@@ -379,18 +382,17 @@ export default function ProductsPage() {
           <Card className="sm:hidden">
             <CardContent className="p-6 text-center">
               <p className="text-muted-foreground">Продукты не найдены.</p>
-              <p className="text-sm mt-1">
-                Попробуйте изменить параметры поиска или добавьте новый продукт.
-              </p>
             </CardContent>
           </Card>
         ) : (
           filteredProducts.map((product) => (
-            <ProductCard key={`mobile-${product.id}`} product={product} />
+            <ProductCardComponent
+              key={`mobile-${product.id}`}
+              product={product}
+            />
           ))
         )}
 
-        {/* Desktop view - table */}
         <div className="hidden sm:block">
           <Card>
             <CardContent className="p-0 sm:p-5">
@@ -406,10 +408,7 @@ export default function ProductsPage() {
                         Цена
                       </TableHead>
                       <TableHead className="hidden lg:table-cell">
-                        Объем (л)
-                      </TableHead>
-                      <TableHead className="hidden lg:table-cell">
-                        Срок годности
+                        Объем
                       </TableHead>
                       <TableHead>Наличие</TableHead>
                       <TableHead>Популярный</TableHead>
@@ -420,187 +419,121 @@ export default function ProductsPage() {
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      // Skeleton loading state
                       Array.from({ length: 6 }).map((_, index) => (
                         <ProductRowSkeleton key={`desktop-skeleton-${index}`} />
                       ))
                     ) : filteredProducts.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="h-24 text-center">
-                          <div className="flex flex-col items-center justify-center text-muted-foreground">
-                            <p>Продукты не найдены.</p>
-                            <p className="text-sm">
-                              Попробуйте изменить параметры поиска или добавьте
-                              новый продукт.
-                            </p>
-                          </div>
+                        <TableCell colSpan={7} className="h-24 text-center">
+                          <p>Продукты не найдены.</p>
                         </TableCell>
                       </TableRow>
                     ) : (
-                      // Actual data
-                      filteredProducts.map((product) => (
-                        <TableRow key={`desktop-${product.id}`}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-md bg-muted overflow-hidden">
-                                {product.images.length > 0 ? (
-                                  <Image
-                                    width={100}
-                                    height={100}
-                                    src={
-                                      product.images[0] || "/placeholder.svg"
-                                    }
-                                    alt={product.name}
-                                    className="h-full w-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
-                                    Нет фото
-                                  </div>
-                                )}
+                      filteredProducts.map((product) => {
+                        const firstItem = getFirstItem(product);
+                        return (
+                          <TableRow key={`desktop-${product.id}`}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-md bg-muted overflow-hidden">
+                                  {product.images.length > 0 ? (
+                                    <Image
+                                      width={100}
+                                      height={100}
+                                      src={
+                                        product.images[0] || "/placeholder.svg"
+                                      }
+                                      alt={product.name}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
+                                      Нет фото
+                                    </div>
+                                  )}
+                                </div>
+                                <span className="font-medium">
+                                  {product.name}
+                                </span>
                               </div>
-                              <span className="font-medium">
-                                {product.name}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {product.category}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {new Intl.NumberFormat("ru-RU", {
-                              style: "currency",
-                              currency: "RUB",
-                            }).format(product.price)}
-                          </TableCell>
-                          <TableCell className="hidden lg:table-cell">
-                            {product.volume || "—"}
-                          </TableCell>
-                          <TableCell className="hidden lg:table-cell">
-                            {product.expiry || "—"}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              className="!text-white"
-                              variant={
-                                product.isInStock ? "default" : "secondary"
-                              }
-                            >
-                              {product.isInStock
-                                ? "В наличии"
-                                : "Нет в наличии"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {product.isPopular ? "Да" : "Нет"}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-end gap-2">
-                              {isMobile ? (
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {product.category}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {firstItem
+                                ? new Intl.NumberFormat("ru-RU", {
+                                    style: "currency",
+                                    currency: "RUB",
+                                  }).format(firstItem.price)
+                                : "Не указана"}
+                            </TableCell>
+                            <TableCell className="hidden lg:table-cell">
+                              {firstItem?.volume || "—"}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className="!text-white"
+                                variant={
+                                  product.isInStock ? "default" : "secondary"
+                                }
+                              >
+                                {product.isInStock
+                                  ? "В наличии"
+                                  : "Нет в наличии"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {product.isPopular ? "Да" : "Нет"}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => openEditDialog(product)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                  <span className="sr-only">Редактировать</span>
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
                                     <Button variant="ghost" size="icon">
-                                      <MoreHorizontal className="h-4 w-4" />
-                                      <span className="sr-only">Действия</span>
+                                      <Trash2 className="h-4 w-4 text-destructive" />
+                                      <span className="sr-only">Удалить</span>
                                     </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                      onClick={() => openEditDialog(product)}
-                                    >
-                                      <Pencil className="mr-2 h-4 w-4" />
-                                      Редактировать
-                                    </DropdownMenuItem>
-                                    <AlertDialog>
-                                      <AlertDialogTrigger asChild>
-                                        <DropdownMenuItem
-                                          onSelect={(e) => e.preventDefault()}
-                                          className="text-destructive"
-                                        >
-                                          <Trash2 className="mr-2 h-4 w-4" />
-                                          Удалить
-                                        </DropdownMenuItem>
-                                      </AlertDialogTrigger>
-                                      <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                          <AlertDialogTitle>
-                                            Удалить продукт?
-                                          </AlertDialogTitle>
-                                          <AlertDialogDescription>
-                                            Вы уверены, что хотите удалить
-                                            продукт {product.name}? Это действие
-                                            нельзя отменить.
-                                          </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                          <AlertDialogCancel>
-                                            Отмена
-                                          </AlertDialogCancel>
-                                          <AlertDialogAction
-                                            onClick={() =>
-                                              handleDeleteProduct(product.id)
-                                            }
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                          >
-                                            Удалить
-                                          </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              ) : (
-                                <>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => openEditDialog(product)}
-                                  >
-                                    <Pencil className="h-4 w-4" />
-                                    <span className="sr-only">
-                                      Редактировать
-                                    </span>
-                                  </Button>
-
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button variant="ghost" size="icon">
-                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                        <span className="sr-only">Удалить</span>
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>
-                                          Удалить продукт?
-                                        </AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Вы уверены, что хотите удалить продукт{" "}
-                                          {product.name}? Это действие нельзя
-                                          отменить.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>
-                                          Отмена
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction
-                                          onClick={() =>
-                                            handleDeleteProduct(product.id)
-                                          }
-                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        >
-                                          Удалить
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        Удалить продукт?
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Вы уверены, что хотите удалить продукт{" "}
+                                        {product.name}? Это действие нельзя
+                                        отменить.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>
+                                        Отмена
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() =>
+                                          handleDeleteProduct(product.id)
+                                        }
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Удалить
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
                     )}
                   </TableBody>
                 </Table>

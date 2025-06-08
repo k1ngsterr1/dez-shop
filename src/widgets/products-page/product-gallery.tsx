@@ -8,14 +8,13 @@ interface ProductGalleryProps {
   images: string[];
   productName: string;
   isNew?: boolean;
-  discount?: number;
+  // discount prop removed as it's not in the DTO
 }
 
 export function ProductGallery({
   images,
   productName,
   isNew,
-  discount,
 }: ProductGalleryProps) {
   const [activeImage, setActiveImage] = useState(0);
 
@@ -29,31 +28,34 @@ export function ProductGallery({
           className="object-cover"
           priority
         />
-        {isNew && <Badge className="absolute top-4 left-4">Новинка</Badge>}
-        {discount && discount > 0 && (
-          <Badge className="absolute top-4 right-4 bg-destructive">
-            -{discount}%
+        {isNew && (
+          <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">
+            Новинка
           </Badge>
         )}
       </div>
-      <div className="grid grid-cols-4 gap-2">
-        {images.map((image, index) => (
-          <button
-            key={index}
-            className={`relative aspect-square rounded-md overflow-hidden border ${
-              activeImage === index ? "border-primary" : "border-border"
-            }`}
-            onClick={() => setActiveImage(index)}
-          >
-            <Image
-              src={image || "/placeholder.svg"}
-              alt={`${productName} - изображение ${index + 1}`}
-              fill
-              className="object-cover"
-            />
-          </button>
-        ))}
-      </div>
+      {images.length > 1 && (
+        <div className="grid grid-cols-4 gap-2">
+          {images.map((image, index) => (
+            <button
+              key={index}
+              className={`relative aspect-square rounded-md overflow-hidden border ${
+                activeImage === index
+                  ? "border-primary ring-2 ring-primary ring-offset-2"
+                  : "border-border"
+              }`}
+              onClick={() => setActiveImage(index)}
+            >
+              <Image
+                src={image || "/placeholder.svg"}
+                alt={`${productName} - изображение ${index + 1}`}
+                fill
+                className="object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

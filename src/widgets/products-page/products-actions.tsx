@@ -1,12 +1,24 @@
 "use client";
 
-import { Truck, ShieldCheck, Clock, FileText } from "lucide-react";
+import {
+  Truck,
+  ShieldCheck,
+  Clock,
+  FileText,
+  ShoppingCart,
+  Phone,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useContactFormStore } from "@/entities/contact-form/store/use-contact-form";
 
 interface ProductActionsProps {
   expiry: string;
+  isInStock: boolean;
 }
 
-export function ProductActions({ expiry }: ProductActionsProps) {
+export function ProductActions({ expiry, isInStock }: ProductActionsProps) {
+  const { openContactForm } = useContactFormStore();
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 text-sm">
@@ -26,6 +38,17 @@ export function ProductActions({ expiry }: ProductActionsProps) {
           <FileText className="h-5 w-5 text-primary" />
           <span>Сертификаты качества</span>
         </div>
+      </div>
+      <div className="space-y-2 pt-4 border-t">
+        <Button
+          variant="outline"
+          size="lg"
+          className="w-full"
+          onClick={openContactForm}
+        >
+          <Phone className="mr-2 h-5 w-5" />
+          Связаться для консультации
+        </Button>
       </div>
     </div>
   );

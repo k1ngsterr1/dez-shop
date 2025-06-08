@@ -1,4 +1,6 @@
 "use client";
+
+import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import { ProductGallery } from "./product-gallery";
 import { ProductTabs } from "./product-tabs";
@@ -12,9 +14,28 @@ import ProductInfo from "./product-info";
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const productId = Number(params?.id) || 1; // Default to 1 if no ID is provided
+  const productId = Number(params?.id);
 
   const { data: product, isLoading, error } = useProductQuery(productId);
+
+  const isNewProduct = useMemo(() => {
+    if (!product) return false;
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return new Date(product.createdAt) > sevenDaysAgo;
+  }, [product]);
+
+  if (!productId) {
+    return (
+      <div className="container w-full mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Ошибка</AlertTitle>
+          <AlertDescription>Неверный ID продукта.</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <ProductDetailSkeleton />;
@@ -25,10 +46,10 @@ export default function ProductDetailPage() {
       <div className="container w-full mx-auto px-4 py-8">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>Ошибка</AlertTitle>
           <AlertDescription>
             {error?.message ||
-              "Failed to load product details. Please try again later."}
+              "Не удалось загрузить детали продукта. Пожалуйста, попробуйте позже."}
           </AlertDescription>
         </Alert>
       </div>
@@ -38,16 +59,18 @@ export default function ProductDetailPage() {
   return (
     <div className="container w-full mx-auto px-4 py-8">
       <ProductBreadcrumbs productName={product.name} />
-      <div className="grid md:grid-cols-2 gap-8 mb-12">
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
         <ProductGallery
           images={product.images}
           productName={product.name}
-          isNew={product.isNew}
-          discount={product.discount}
+          isNew={isNewProduct}
         />
-        <div>
+        <div className="flex flex-col justify-between">
           <ProductInfo product={product} />
-          <ProductActions expiry={product.expiry} />
+          <ProductActions
+            expiry={product.expiry}
+            isInStock={product.isInStock}
+          />
         </div>
       </div>
       <ProductTabs description={product.description} />
@@ -58,35 +81,35 @@ export default function ProductDetailPage() {
 function ProductDetailSkeleton() {
   return (
     <div className="container w-full mx-auto px-4 py-8">
-      <div className="h-6 w-64 mb-8">
+      <div className="h-6 w-1/2 md:w-1/3 mb-8">
         <Skeleton className="h-full w-full" />
       </div>
-      <div className="grid md:grid-cols-2 gap-8 mb-12">
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
         <div className="aspect-square w-full">
-          <Skeleton className="h-full w-full" />
+          <Skeleton className="h-full w-full rounded-lg" />
         </div>
-        <div className="space-y-4">
+        <div className="space-y-6">
           <Skeleton className="h-10 w-3/4" />
           <Skeleton className="h-6 w-1/2" />
-          <Skeleton className="h-6 w-1/4" />
-          <div className="space-y-2 mt-6">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-8 w-1/4" />
+          <div className="space-y-3 mt-6">
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-5/6" />
+            <Skeleton className="h-5 w-3/4" />
           </div>
           <div className="pt-6">
-            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full md:w-1/2" />
           </div>
         </div>
       </div>
       <div>
-        <div className="border-b mb-4">
-          <Skeleton className="h-10 w-64" />
+        <div className="border-b mb-6">
+          <Skeleton className="h-10 w-1/3 md:w-1/4" />
         </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-5/6" />
         </div>
       </div>
     </div>

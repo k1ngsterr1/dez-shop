@@ -1,13 +1,19 @@
+export interface Item {
+  price: number;
+  volume: string;
+}
+
 export interface Product {
   id: number;
   name: string;
   category: string;
   description: string;
-  price?: number;
+  // The backend sends `items` as a JSON string.
+  // It needs to be parsed on the client.
+  items: string;
   isInStock: boolean;
   isPopular: boolean;
   images: string[];
-  volume: number;
   expiry: string;
   createdAt: Date;
   updatedAt: Date;
@@ -17,15 +23,14 @@ export interface ProductFormValues {
   name: string;
   category: string;
   description: string;
-  price?: number;
-  volume: number;
+  items: Item[];
   expiry: string;
   isInStock: boolean;
   isPopular: boolean;
 }
 
-// Update the ProductWithImages interface to only include formData
+// This interface is used for passing data to the mutation hooks
 export interface ProductWithImages extends Partial<ProductFormValues> {
-  images?: string[];
+  images?: File[];
   formData?: FormData;
 }
