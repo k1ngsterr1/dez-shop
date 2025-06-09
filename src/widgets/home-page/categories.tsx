@@ -1,26 +1,67 @@
 "use client";
 
 import Link from "next/link";
-import { Droplets, AlertCircle } from "lucide-react";
+import { Droplets, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useCategoriesQuery } from "@/entities/category/hooks/query/use-get-categories.query";
+import type { Subcategory } from "@/entities/subcategory/dto/subcategory.dto";
+import { useMemo, useState } from "react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { useSubcategoriesQuery } from "@/entities/subcategory/hooks/query/use-get-subcategories.query";
 
 export function Categories() {
-  const { data: categories, isLoading, error } = useCategoriesQuery();
+  const {
+    data: categories,
+    isLoading: isLoadingCategories,
+    error: errorCategories,
+  } = useCategoriesQuery();
+  const {
+    data: subcategoriesData,
+    isLoading: isLoadingSubcategories,
+    error: errorSubcategories,
+  } = useSubcategoriesQuery();
+  const [openCategories, setOpenCategories] = useState<Record<number, boolean>>(
+    {}
+  );
 
-  // Loading state
+  const subcategoriesByCategoryId = useMemo(() => {
+    if (!subcategoriesData) return new Map<number, Subcategory[]>();
+    return subcategoriesData.reduce((acc, sub) => {
+      if (!acc.has(sub.categoryId)) {
+        acc.set(sub.categoryId, []);
+      }
+      acc.get(sub.categoryId)!.push(sub);
+      return acc;
+    }, new Map<number, Subcategory[]>());
+  }, [subcategoriesData]);
+
+  const toggleCategory = (categoryId: number) => {
+    setOpenCategories((prev) => ({ ...prev, [categoryId]: !prev[categoryId] }));
+  };
+
+  const isLoading = isLoadingCategories || isLoadingSubcategories;
+  const error = errorCategories || errorSubcategories;
+
   if (isLoading) {
     return (
       <div className="rounded-lg border bg-card p-4 shadow-sm">
         <Skeleton className="h-7 w-40 mb-4" />
-        <div className="space-y-2">
-          {Array(8)
+        <div className="space-y-3">
+          {Array(4)
             .fill(0)
             .map((_, index) => (
-              <div key={index} className="flex items-center">
-                <Skeleton className="h-4 w-4 mr-2" />
-                <Skeleton className="h-4 w-full max-w-[200px]" />
+              <div key={index} className="space-y-2 py-1">
+                <Skeleton className="h-6 w-3/4" />
+                <div className="pl-4 space-y-1">
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
               </div>
             ))}
         </div>
@@ -28,7 +69,6 @@ export function Categories() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="rounded-lg border bg-card p-4 shadow-sm">
@@ -36,14 +76,13 @@ export function Categories() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Ошибка</AlertTitle>
           <AlertDescription>
-            Не удалось загрузить категории. Пожалуйста, попробуйте позже.
+            Не удалось загрузить данные. Пожалуйста, попробуйте позже.
           </AlertDescription>
         </Alert>
       </div>
     );
   }
 
-  // If no categories found
   if (!categories || categories.length === 0) {
     return (
       <div className="rounded-lg border bg-card p-4 shadow-sm">
@@ -56,17 +95,65 @@ export function Categories() {
   return (
     <div className="rounded-lg border bg-card p-4 shadow-sm">
       <h2 className="mb-4 text-xl font-bold text-primary">Категории</h2>
-      <ul className="space-y-2">
-        {categories.map((category) => {
+      <ul className="space-y-1">
+        {categories?.map((category) => {
+          const categorySubcategories =
+            subcategoriesByCategoryId.get(category.id) || [];
+          const isOpen = openCategories[category.id] || false;
           return (
-            <li key={category.id || category.name}>
-              <Link
-                href={category.href || `/category/${category.name}`}
-                className="flex items-center rounded-md p-2 text-sm transition-colors hover:bg-muted"
+            <li key={category.id}>
+              <Collapsible
+                open={isOpen}
+                onOpenChange={() => toggleCategory(category.id)}
               >
-                <Droplets className="mr-2 h-4 w-4 text-primary" />
-                <span>{category.name}</span>
-              </Link>
+                <div className="flex items-center justify-between rounded-md transition-colors hover:bg-muted">
+                  {/* UPDATED LINK FOR CATEGORY */}
+                  <Link
+                    href={`/category/${encodeURIComponent(category.name)}`}
+                    className="flex flex-1 items-center p-2 text-sm"
+                  >
+                    <Droplets className="mr-2 h-4 w-4 text-primary" />
+                    <span>{category.name}</span>
+                  </Link>
+                  {categorySubcategories.length > 0 && (
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-1 h-auto mr-1"
+                      >
+                        {isOpen ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                        <span className="sr-only">
+                          {isOpen ? "Свернуть" : "Развернуть"}
+                        </span>
+                      </Button>
+                    </CollapsibleTrigger>
+                  )}
+                </div>
+                {categorySubcategories.length > 0 && (
+                  <CollapsibleContent>
+                    <ul className="pl-6 pt-1 space-y-1 border-l border-border ml-3 my-1">
+                      {categorySubcategories.map((sub) => (
+                        <li key={sub.id}>
+                          {/* UPDATED LINK FOR SUBCATEGORY */}
+                          <Link
+                            href={`/subcategory/${encodeURIComponent(
+                              sub.name
+                            )}`}
+                            className="flex items-center rounded-md p-1.5 text-xs transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
+                          >
+                            <span>{sub.name}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </CollapsibleContent>
+                )}
+              </Collapsible>
             </li>
           );
         })}

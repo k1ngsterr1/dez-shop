@@ -2,31 +2,25 @@
 
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { getCategoryProducts } from "../../api/get/get-category-products.api";
+import { getSubcategoryProducts } from "../../api/get/get-subcategory-products.api";
 import type { Product } from "../../dto/product.dto";
 
-// The hook's name was slightly different in your code, let's standardize it
-export const useCategoryProductsQuery = (encodedSlug?: string) => {
+export const useSubcategoryProductsQuery = (encodedSlug?: string) => {
   const [data, setData] = useState<Product[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
-    // If there's no slug, don't fetch.
     if (!encodedSlug) {
       setData([]);
       setIsLoading(false);
       return;
     }
-
-    // **THE FIX IS HERE**: Decode the slug before using it.
-    const decodedCategoryName = decodeURIComponent(encodedSlug);
-
+    const decodedSubcategoryName = decodeURIComponent(encodedSlug);
     try {
       setIsLoading(true);
       setError(null);
-      // Pass the DECODED name to the API function
-      const result = await getCategoryProducts(decodedCategoryName);
+      const result = await getSubcategoryProducts(decodedSubcategoryName);
       setData(result);
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -41,7 +35,7 @@ export const useCategoryProductsQuery = (encodedSlug?: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [encodedSlug]); // Dependency is the original encoded slug
+  }, [encodedSlug]);
 
   useEffect(() => {
     fetchData();

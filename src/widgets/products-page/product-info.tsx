@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import type { Product, Item } from "@/entities/product/dto/product.dto";
-import { formatPrice } from "@/lib/format-price"; // This will now use the updated function
+import { formatPrice } from "@/lib/format-price";
 import { Check } from "lucide-react";
 
 interface ProductInfoProps {
@@ -64,7 +64,16 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
       <h1 className="text-3xl font-bold tracking-tight">{product.name}</h1>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{product.category}</p>
+        <div className="text-sm text-muted-foreground">
+          <span>{product.category}</span>
+          {product.subcategory &&
+            product.subcategory !== "" && ( // Display subcategory if it exists
+              <>
+                <span className="mx-1">/</span>
+                <span>{product.subcategory}</span>
+              </>
+            )}
+        </div>
         {product.isInStock ? (
           <Badge
             variant="outline"
@@ -102,7 +111,6 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 
       {displayItem ? (
         <div className="flex items-baseline gap-2">
-          {/* The formatPrice function will now apply the dot separator */}
           <span className="text-3xl font-bold text-primary">
             {formatPrice(displayItem.price)}
           </span>

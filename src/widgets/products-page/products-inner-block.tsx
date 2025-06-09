@@ -2,15 +2,15 @@
 
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
-import { ProductGallery } from "./product-gallery";
-import { ProductTabs } from "./product-tabs";
-import { ProductActions } from "./products-actions";
-import { ProductBreadcrumbs } from "./products-breadcrumbs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useProductQuery } from "@/entities/product/hooks/query/use-get-product.query";
+import { ProductBreadcrumbs } from "./products-breadcrumbs";
+import { ProductGallery } from "./product-gallery";
 import ProductInfo from "./product-info";
+import { ProductActions } from "./products-actions";
+import { ProductTabs } from "./product-tabs";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -25,7 +25,8 @@ export default function ProductDetailPage() {
     return new Date(product.createdAt) > sevenDaysAgo;
   }, [product]);
 
-  if (!productId) {
+  if (!productId && !isLoading) {
+    // Check productId only if not loading
     return (
       <div className="container w-full mx-auto px-4 py-8">
         <Alert variant="destructive">
@@ -56,9 +57,21 @@ export default function ProductDetailPage() {
     );
   }
 
+  // Construct links for breadcrumbs
+  const categoryLink = `/category/${encodeURIComponent(product.category)}`;
+  const subcategoryLink = product.subcategory
+    ? `${categoryLink}/${encodeURIComponent(product.subcategory)}`
+    : undefined;
+
   return (
     <div className="container w-full mx-auto px-4 py-8">
-      <ProductBreadcrumbs productName={product.name} />
+      <ProductBreadcrumbs
+        productName={product.name}
+        categoryName={product.category}
+        categoryLink={categoryLink}
+        subcategoryName={product.subcategory || undefined} // Pass undefined if empty string
+        subcategoryLink={subcategoryLink}
+      />
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
         <ProductGallery
           images={product.images}
@@ -89,20 +102,26 @@ function ProductDetailSkeleton() {
           <Skeleton className="h-full w-full rounded-lg" />
         </div>
         <div className="space-y-6">
-          <Skeleton className="h-10 w-3/4" />
-          <Skeleton className="h-6 w-1/2" />
-          <Skeleton className="h-8 w-1/4" />
+          <Skeleton className="h-10 w-3/4" /> {/* Product Name */}
+          <Skeleton className="h-6 w-1/2" /> {/* Category/Subcategory */}
+          <Skeleton className="h-8 w-1/4" /> {/* Price */}
           <div className="space-y-3 mt-6">
+            {" "}
+            {/* Description */}
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-5/6" />
             <Skeleton className="h-5 w-3/4" />
           </div>
           <div className="pt-6">
+            {" "}
+            {/* Actions */}
             <Skeleton className="h-12 w-full md:w-1/2" />
           </div>
         </div>
       </div>
       <div>
+        {" "}
+        {/* Tabs */}
         <div className="border-b mb-6">
           <Skeleton className="h-10 w-1/3 md:w-1/4" />
         </div>
