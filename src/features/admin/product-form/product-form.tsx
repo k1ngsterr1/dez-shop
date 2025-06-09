@@ -377,9 +377,9 @@ export function ProductForm({
                     <FormLabel>Подкатегория</FormLabel>
                     <Select
                       onValueChange={(value) =>
-                        field.onChange(value === "none" ? "" : value)
-                      } // Handle "none" option
-                      value={field.value || ""} // Ensure value is a string
+                        field.onChange(value === "--none--" ? "" : value)
+                      } // Changed
+                      value={field.value || ""}
                       disabled={
                         !selectedCategoryObject ||
                         isLoadingSubcategories ||
@@ -402,8 +402,8 @@ export function ProductForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">-- Нет --</SelectItem>{" "}
-                        {/* Value is empty string */}
+                        <SelectItem value="--none--">-- Нет --</SelectItem>{" "}
+                        {/* Changed */}
                         {filteredSubcategories.map((sub) => (
                           <SelectItem key={sub.id} value={sub.name}>
                             {sub.name}
