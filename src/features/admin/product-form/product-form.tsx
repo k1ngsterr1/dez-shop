@@ -1,9 +1,14 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray } from "react-hook-form";
+import {
+  useForm,
+  useFieldArray,
+  type Control,
+  type SubmitHandler,
+} from "react-hook-form"; // Added Control, SubmitHandler
 import { z } from "zod";
 import { Trash2, Upload, Loader2, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,9 +34,12 @@ import { DialogFooter } from "@/components/ui/dialog";
 import type {
   ProductWithImages,
   Product,
+  Item,
 } from "@/entities/product/dto/product.dto";
 import { useCategoriesQuery } from "@/entities/category/hooks/query/use-get-categories.query";
+import type { Category } from "@/entities/category/dto/category.dto";
 import Image from "next/image";
+import { useSubcategoriesQuery } from "@/entities/subcategory/hooks/query/use-get-subcategories.query";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = [
@@ -48,6 +56,7 @@ const itemSchema = z.object({
   volume: z.string().min(1, { message: "Укажите объем" }),
 });
 
+// Adjusting subcategory to be z.string(), defaulting to ""
 const productFormSchema = z.object({
   name: z.string().min(2, {
     message: "Название должно содержать не менее 2 символов",
@@ -55,21 +64,23 @@ const productFormSchema = z.object({
   category: z.string().min(1, {
     message: "Выберите категорию",
   }),
+  subcategory: z.string(), // Changed: now always a string, use "" for none
   description: z.string().min(10, {
     message: "Описание должно содержать не менее 10 символов",
   }),
   items: z
     .array(itemSchema)
     .min(1, { message: "Добавьте хотя бы один вариант товара" }),
-  expiry: z.string().optional(),
+  expiry: z.string().optional(), // This can be string | undefined
   isInStock: z.boolean(),
   isPopular: z.boolean(),
 });
 
-type ProductFormValues = z.infer<typeof productFormSchema>;
+// This type is inferred from productFormSchema. `subcategory` will be `string`.
+type ProductFormValuesInternal = z.infer<typeof productFormSchema>;
 
 interface ProductFormProps {
-  onSubmit: (data: ProductWithImages) => void;
+  onSubmit: (data: ProductWithImages) => Promise<void>;
   initialData?: Product;
   isEditing?: boolean;
   isSubmitting?: boolean;
@@ -85,126 +96,201 @@ export function ProductForm({
 }: ProductFormProps) {
   const [newImages, setNewImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const { data: categories = [] } = useCategoriesQuery();
+  const [existingImageUrlsState, setExistingImageUrlsState] = useState<
+    string[]
+  >([]);
 
-  const form = useForm<ProductFormValues>({
+  const { data: categories = [], isLoading: isLoadingCategories } =
+    useCategoriesQuery();
+  const { data: allSubcategories = [], isLoading: isLoadingSubcategories } =
+    useSubcategoriesQuery();
+
+  const form = useForm<ProductFormValuesInternal>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: "",
       category: "",
+      subcategory: "", // Default to empty string
       description: "",
       items: [{ price: 0, volume: "" }],
-      expiry: "",
+      expiry: undefined, // Explicitly undefined for optional field
       isInStock: true,
       isPopular: false,
     },
   });
 
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
+    control: form.control as Control<ProductFormValuesInternal>, // Explicit cast if needed
     name: "items",
   });
 
+  const selectedCategoryName = form.watch("category");
+
+  const selectedCategoryObject = useMemo(() => {
+    if (!selectedCategoryName || isLoadingCategories) return null;
+    return categories.find((cat) => cat.name === selectedCategoryName);
+  }, [selectedCategoryName, categories, isLoadingCategories]);
+
+  const filteredSubcategories = useMemo(() => {
+    if (!selectedCategoryObject || isLoadingSubcategories) return [];
+    if (!Array.isArray(allSubcategories) || allSubcategories.length === 0)
+      return [];
+    return allSubcategories.filter(
+      (sub) => sub.categoryId === selectedCategoryObject.id
+    );
+  }, [selectedCategoryObject, allSubcategories, isLoadingSubcategories]);
+
   useEffect(() => {
     if (initialData) {
+      let parsedItems: Item[] = [{ price: 0, volume: "" }];
+      try {
+        if (initialData.items && typeof initialData.items === "string") {
+          const parsed = JSON.parse(initialData.items);
+          if (Array.isArray(parsed) && parsed.length > 0) parsedItems = parsed;
+        } else if (
+          Array.isArray(initialData.items) &&
+          initialData.items.length > 0
+        ) {
+          parsedItems = initialData.items as Item[];
+        }
+      } catch (e) {
+        console.error("Failed to parse items from initialData:", e);
+      }
+
       form.reset({
         name: initialData.name || "",
         category: initialData.category || "",
+        subcategory: initialData.subcategory || "", // Expects string, default to ""
         description: initialData.description || "",
-        items: initialData.items
-          ? JSON.parse(initialData.items)
-          : [{ price: 0, volume: "" }],
-        expiry: initialData.expiry || "",
+        items: parsedItems,
+        expiry: initialData.expiry || undefined,
         isInStock: initialData.isInStock ?? true,
         isPopular: initialData.isPopular ?? false,
       });
-      setImageUrls(initialData.images || []);
+      const initialImageUrls = initialData.images || [];
+      setImageUrls(initialImageUrls);
+      setExistingImageUrlsState(
+        initialImageUrls.filter((url) => !url.startsWith("blob:"))
+      );
     }
   }, [initialData, form]);
+
+  useEffect(() => {
+    if (selectedCategoryName) {
+      const currentSubcategoryName = form.getValues("subcategory");
+      if (currentSubcategoryName && currentSubcategoryName !== "") {
+        const isValidSubcategory = filteredSubcategories.some(
+          (sub) => sub.name === currentSubcategoryName
+        );
+        if (!isValidSubcategory) {
+          form.setValue("subcategory", "", { shouldValidate: true });
+        }
+      }
+    } else {
+      form.setValue("subcategory", "", { shouldValidate: true });
+    }
+  }, [selectedCategoryName, filteredSubcategories, form]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
-    const newFiles: File[] = [];
-    const newUrls: string[] = [];
-
-    Array.from(files).forEach((file) => {
+    const currentImageCount = imageUrls.length;
+    const filesToAdd = Array.from(files).slice(
+      0,
+      Math.max(0, 5 - currentImageCount)
+    );
+    const tempNewFiles: File[] = [];
+    const tempNewUrls: string[] = [];
+    filesToAdd.forEach((file) => {
       if (file.size > MAX_FILE_SIZE) {
-        form.setError("root", {
+        form.setError("root.images" as any, {
           message: `Файл ${file.name} слишком большой. Макс. размер 5MB.`,
         });
         return;
       }
       if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-        form.setError("root", {
+        form.setError("root.images" as any, {
           message: `Неподдерживаемый формат файла ${file.name}.`,
         });
         return;
       }
-      newFiles.push(file);
-      newUrls.push(URL.createObjectURL(file));
+      tempNewFiles.push(file);
+      tempNewUrls.push(URL.createObjectURL(file));
     });
-
-    setNewImages((prev) => [...prev, ...newFiles]);
-    setImageUrls((prev) => [...prev, ...newUrls]);
-  };
-
-  const removeImage = (index: number, url: string) => {
-    // If it's a blob URL, it corresponds to a new file
-    if (url.startsWith("blob:")) {
-      const newImageIndex = imageUrls
-        .filter((u) => u.startsWith("blob:"))
-        .indexOf(url);
-      if (newImageIndex > -1) {
-        setNewImages((prev) => prev.filter((_, i) => i !== newImageIndex));
-      }
-      URL.revokeObjectURL(url);
+    setNewImages((prev) => [...prev, ...tempNewFiles]);
+    setImageUrls((prev) => [...prev, ...tempNewUrls]);
+    if (form.formState.errors.root?.images) {
+      form.clearErrors("root.images" as any);
     }
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleFormSubmit = async (data: ProductFormValues) => {
-    if (!isEditing && newImages.length === 0) {
-      form.setError("root", {
+  const removeImage = (index: number, urlToRemove: string) => {
+    setImageUrls((prevUrls) => prevUrls.filter((url) => url !== urlToRemove));
+    if (urlToRemove.startsWith("blob:")) {
+      setNewImages((prevFiles) =>
+        prevFiles.filter((file) => URL.createObjectURL(file) !== urlToRemove)
+      );
+      URL.revokeObjectURL(urlToRemove);
+    } else {
+      setExistingImageUrlsState((prev) =>
+        prev.filter((url) => url !== urlToRemove)
+      );
+    }
+  };
+
+  // Explicitly type `data` parameter for SubmitHandler
+  const handleFormSubmit: SubmitHandler<ProductFormValuesInternal> = async (
+    data
+  ) => {
+    if (
+      !isEditing &&
+      newImages.length === 0 &&
+      existingImageUrlsState.length === 0
+    ) {
+      form.setError("root.images" as any, {
         message: "Добавьте хотя бы одно изображение продукта",
       });
       return;
     }
+    form.clearErrors("root.images" as any);
 
     try {
       const formData = new FormData();
-
-      // Append all data except images
-      const { items, ...restOfData } = data;
-      Object.entries(restOfData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, String(value));
-        }
-      });
-
-      // Stringify and append items
-      formData.append("items", JSON.stringify(items));
-
-      // Append new images
-      newImages.forEach((file) => {
-        formData.append("images", file);
-      });
-
-      // For editing, also send existing image URLs if you need to handle deletions on the backend
+      formData.append("name", data.name);
+      formData.append("category", data.category);
+      formData.append("subcategory", data.subcategory); // Will be "" if none selected
+      formData.append("description", data.description);
+      formData.append("items", JSON.stringify(data.items));
+      if (data.expiry) formData.append("expiry", data.expiry);
+      formData.append("isInStock", String(data.isInStock));
+      formData.append("isPopular", String(data.isPopular));
+      newImages.forEach((file) => formData.append("images", file));
       if (isEditing) {
-        const existingImages = imageUrls.filter(
-          (url) => !url.startsWith("blob:")
+        existingImageUrlsState.forEach((url) =>
+          formData.append("existingImages[]", url)
         );
-        existingImages.forEach((url) => {
-          formData.append("existingImages", url);
-        });
       }
 
-      await onSubmit({
-        formData,
+      const submissionObject: ProductWithImages = {
         name: data.name,
-      });
+        category: data.category,
+        subcategory: data.subcategory, // data.subcategory is already string (or "" )
+        description: data.description,
+        items: data.items,
+        expiry: data.expiry,
+        isInStock: data.isInStock,
+        isPopular: data.isPopular,
+        images: newImages,
+        existingImages: isEditing ? existingImageUrlsState : undefined,
+        formData: formData,
+      };
+      await onSubmit(submissionObject);
+      if (!isEditing) {
+        form.reset();
+        setNewImages([]);
+        setImageUrls([]);
+        setExistingImageUrlsState([]);
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
       form.setError("root", { message: "Ошибка при отправке формы" });
@@ -213,6 +299,7 @@ export function ProductForm({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Cast form.control if TypeScript still has issues inferring it perfectly */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleFormSubmit)}
@@ -229,7 +316,7 @@ export function ProductForm({
             <div className="grid gap-6">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <FormField
-                  control={form.control}
+                  control={form.control as Control<ProductFormValuesInternal>}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
@@ -245,27 +332,34 @@ export function ProductForm({
                   )}
                 />
                 <FormField
-                  control={form.control}
+                  control={form.control as Control<ProductFormValuesInternal>}
                   name="category"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Категория</FormLabel>
                       <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.setValue("subcategory", "");
+                        }}
+                        value={field.value || ""}
+                        disabled={isLoadingCategories}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Выберите категорию" />
+                            <SelectValue
+                              placeholder={
+                                isLoadingCategories
+                                  ? "Загрузка категорий..."
+                                  : "Выберите категорию"
+                              }
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem
-                              key={category.name}
-                              value={category.name}
-                            >
-                              {category.name}
+                          {categories.map((cat: Category) => (
+                            <SelectItem key={cat.id} value={cat.name}>
+                              {cat.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -276,7 +370,53 @@ export function ProductForm({
                 />
               </div>
               <FormField
-                control={form.control}
+                control={form.control as Control<ProductFormValuesInternal>}
+                name="subcategory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Подкатегория</FormLabel>
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange(value === "none" ? "" : value)
+                      } // Handle "none" option
+                      value={field.value || ""} // Ensure value is a string
+                      disabled={
+                        !selectedCategoryObject ||
+                        isLoadingSubcategories ||
+                        filteredSubcategories.length === 0
+                      }
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={
+                              !selectedCategoryObject
+                                ? "Сначала выберите категорию"
+                                : isLoadingSubcategories
+                                ? "Загрузка подкатегорий..."
+                                : filteredSubcategories.length === 0
+                                ? "Нет подкатегорий"
+                                : "Выберите подкатегорию"
+                            }
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">-- Нет --</SelectItem>{" "}
+                        {/* Value is empty string */}
+                        {filteredSubcategories.map((sub) => (
+                          <SelectItem key={sub.id} value={sub.name}>
+                            {sub.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control as Control<ProductFormValuesInternal>}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
@@ -293,11 +433,15 @@ export function ProductForm({
                 )}
               />
               <div>
-                <Label>Изображения</Label>
+                <Label>Изображения (макс. 5)</Label>
                 <div className="mt-2">
                   <label
                     htmlFor="dropzone-file"
-                    className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-background/50 border-border hover:bg-background/80"
+                    className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg bg-background/50 border-border ${
+                      imageUrls.length >= 5
+                        ? "cursor-not-allowed opacity-50"
+                        : "cursor-pointer hover:bg-background/80"
+                    }`}
                   >
                     <div className="flex flex-col items-center justify-center pt-4 pb-4">
                       <Upload className="w-6 h-6 mb-1 text-muted-foreground" />
@@ -308,28 +452,37 @@ export function ProductForm({
                         или перетащите
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        PNG, JPG, WEBP (макс. 5MB)
+                        PNG, JPG, WEBP (макс. 5MB каждое)
                       </p>
                     </div>
                     <input
                       id="dropzone-file"
                       type="file"
                       className="hidden"
-                      accept="image/png, image/jpeg, image/jpg, image/webp"
+                      accept={ACCEPTED_IMAGE_TYPES.join(",")}
                       multiple
                       onChange={handleImageChange}
+                      disabled={imageUrls.length >= 5}
                     />
                   </label>
                 </div>
+                {form.formState.errors.root?.images && (
+                  <p className="text-sm font-medium text-destructive mt-2">
+                    {(form.formState.errors.root as any).images.message}
+                  </p>
+                )}
                 {imageUrls.length > 0 && (
-                  <div className="grid grid-cols-2 gap-4 mt-4 sm:grid-cols-3 md:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-4 mt-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                     {imageUrls.map((url, index) => (
-                      <div key={index} className="relative group">
+                      <div key={url || index} className="relative group">
                         <div className="overflow-hidden rounded-lg aspect-square bg-muted">
                           <Image
                             width={100}
                             height={100}
-                            src={url || "/placeholder.svg"}
+                            src={
+                              url ||
+                              "/placeholder.svg?width=100&height=100&query=No+Image"
+                            }
                             alt={`Product image ${index + 1}`}
                             className="object-cover w-full h-full"
                           />
@@ -338,6 +491,7 @@ export function ProductForm({
                           type="button"
                           onClick={() => removeImage(index, url)}
                           className="absolute cursor-pointer top-1 right-1 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                          aria-label={`Remove image ${index + 1}`}
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -356,9 +510,11 @@ export function ProductForm({
                       className="flex items-end gap-4 p-4 border rounded-lg"
                     >
                       <FormField
-                        control={form.control}
+                        control={
+                          form.control as Control<ProductFormValuesInternal>
+                        }
                         name={`items.${index}.price`}
-                        render={({ field }) => (
+                        render={({ field: itemField }) => (
                           <FormItem className="flex-1">
                             <FormLabel>Цена</FormLabel>
                             <FormControl>
@@ -370,7 +526,12 @@ export function ProductForm({
                                   type="number"
                                   placeholder="0.00"
                                   className="pl-8"
-                                  {...field}
+                                  {...itemField}
+                                  value={
+                                    itemField.value === undefined
+                                      ? ""
+                                      : itemField.value
+                                  }
                                 />
                               </div>
                             </FormControl>
@@ -379,13 +540,15 @@ export function ProductForm({
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={
+                          form.control as Control<ProductFormValuesInternal>
+                        }
                         name={`items.${index}.volume`}
-                        render={({ field }) => (
+                        render={({ field: itemField }) => (
                           <FormItem className="flex-1">
                             <FormLabel>Объем</FormLabel>
                             <FormControl>
-                              <Input placeholder="1 л, 500 мл" {...field} />
+                              <Input placeholder="1 л, 500 мл" {...itemField} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -397,6 +560,7 @@ export function ProductForm({
                         size="icon"
                         onClick={() => remove(index)}
                         disabled={fields.length <= 1}
+                        aria-label={`Remove item ${index + 1}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -414,20 +578,24 @@ export function ProductForm({
                   Добавить вариант
                 </Button>
                 <FormField
-                  control={form.control}
+                  control={form.control as Control<ProductFormValuesInternal>}
                   name="items"
                   render={() => <FormMessage className="mt-2" />}
                 />
               </div>
 
               <FormField
-                control={form.control}
+                control={form.control as Control<ProductFormValuesInternal>}
                 name="expiry"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Срок годности</FormLabel>
+                    <FormLabel>Срок годности (необязательно)</FormLabel>
                     <FormControl>
-                      <Input placeholder="3 года, 2 месяца" {...field} />
+                      <Input
+                        placeholder="3 года, 2 месяца"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -436,7 +604,7 @@ export function ProductForm({
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <FormField
-                  control={form.control}
+                  control={form.control as Control<ProductFormValuesInternal>}
                   name="isInStock"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
@@ -453,7 +621,7 @@ export function ProductForm({
                   )}
                 />
                 <FormField
-                  control={form.control}
+                  control={form.control as Control<ProductFormValuesInternal>}
                   name="isPopular"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
@@ -475,14 +643,22 @@ export function ProductForm({
             </div>
             {form.formState.errors.root && (
               <p className="text-sm font-medium text-destructive mt-4">
-                {form.formState.errors.root.message}
+                {(form.formState.errors.root as any).message ||
+                  "Произошла ошибка"}
               </p>
             )}
           </div>
 
-          <DialogFooter className="mt-6 pt-4 border-t bg-background">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && (
+          <DialogFooter className="mt-6 pt-4 border-t bg-background sticky bottom-0">
+            <Button
+              type="submit"
+              disabled={
+                isSubmitting || isLoadingCategories || isLoadingSubcategories
+              }
+            >
+              {(isSubmitting ||
+                isLoadingCategories ||
+                isLoadingSubcategories) && (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               )}
               {isEditing ? "Сохранить изменения" : "Добавить продукт"}

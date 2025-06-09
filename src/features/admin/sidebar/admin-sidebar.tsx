@@ -1,9 +1,15 @@
 "use client";
-
-import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Package, Settings, X, Menu, House } from "lucide-react";
+import {
+  Package,
+  Settings,
+  X,
+  Menu,
+  HomeIcon as House,
+  LayoutGrid,
+  ListTree,
+} from "lucide-react"; // Added ListTree
 import {
   Sidebar,
   SidebarContent,
@@ -11,9 +17,8 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarRail,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sidebar"; // Assuming sidebar components are in ui
 import { Button } from "@/components/ui/button";
 
 const navigationItems = [
@@ -24,11 +29,16 @@ const navigationItems = [
   },
   {
     title: "Категории",
-    icon: Settings,
+    icon: LayoutGrid,
     href: "/admin/category",
   },
   {
-    title: "Главная",
+    title: "Подкатегории",
+    icon: ListTree,
+    href: "/admin/subcategories",
+  },
+  {
+    title: "Главная сайта",
     icon: House,
     href: "/",
   },
@@ -36,15 +46,18 @@ const navigationItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const { state, setOpen } = useSidebar(); // ✅ Use context
+  const { state, setOpen } = useSidebar();
   const isVisible = state === "expanded";
 
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => {
+    if (href === "/admin/products")
+      return pathname.startsWith("/admin/products") || pathname === "/admin";
+    if (href === "/") return pathname === href;
+    return pathname.startsWith(href);
+  };
 
   return (
     <>
-      {/* Show toggle button when sidebar is collapsed */}
       {!isVisible && (
         <Button
           onClick={() => setOpen(true)}
@@ -53,61 +66,66 @@ export function AdminSidebar() {
           variant="outline"
         >
           <Menu className="h-4 w-4" />
-          <span className="sr-only">Open Sidebar</span>
+          <span className="sr-only">Открыть боковую панель</span>
         </Button>
       )}
 
-      {/* Sidebar container */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 transition-all duration-300 ease-in-out ${
-          isVisible
-            ? "translate-x-0 opacity-100 pointer-events-auto"
-            : "-translate-x-full opacity-0 pointer-events-none"
-        }`}
-        style={{ width: "var(--sidebar-width)" }}
+        className={`fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out 
+                  ${isVisible ? "translate-x-0" : "-translate-x-full"}
+                  md:translate-x-0 md:static md:inset-y-auto md:h-auto`}
+        style={{ width: "var(--sidebar-width, 250px)" }} // Provide a default width
       >
         <Sidebar
-          variant="sidebar"
+          variant="sidebar" // or "rail" if you want it to be rail by default on larger screens
           collapsible="icon"
-          className="h-full w-full shadow-xl"
+          className="h-full w-full shadow-xl border-r"
         >
           <SidebarHeader className="border-b !w-full bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
-            <div className="flex items-center justify-between px-2 py-5">
-              <span className="text-base font-bold tracking-tight">
-                PROFDEZ
-              </span>
+            <div className="flex items-center justify-between px-4 py-5 h-[65px]">
+              {" "}
+              {/* Fixed height for header */}
+              <Link href="/admin" className="text-lg font-bold tracking-tight">
+                PROFDEZ Admin
+              </Link>
               <Button
                 onClick={() => setOpen(false)}
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 transition-all duration-200 hover:rotate-90"
+                className="h-8 w-8 transition-all duration-200 hover:rotate-90 md:hidden" // Hide on md and up if sidebar is static
               >
                 <X className="h-4 w-4" />
-                <span className="sr-only">Close Sidebar</span>
+                <span className="sr-only">Закрыть боковую панель</span>
               </Button>
             </div>
           </SidebarHeader>
 
-          <SidebarContent className="px-4 w-full py-6">
+          <SidebarContent className="px-3 py-6 w-full">
+            {" "}
+            {/* Adjusted padding */}
             <SidebarMenu>
               {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.title} className="mb-1">
                   <SidebarMenuButton
+                    asChild
                     isActive={isActive(item.href)}
                     tooltip={item.title}
-                    className="mb-2 py-2.5 flex items-center justify-center w-full transition-colors duration-200"
+                    className="w-full justify-start" // Ensure text aligns left
                   >
-                    <Link href={item.href} className="flex items-center gap-2">
+                    <Link
+                      href={item.href}
+                      className="flex items-center gap-3 px-3 py-2.5"
+                    >
                       <item.icon className="h-5 w-5" />
-                      <span className="font-medium">{item.title}</span>
+                      <span className="font-medium text-sm">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarContent>
-
-          <SidebarRail />
+          {/* SidebarRail might be used if you have a rail mode, adjust as needed */}
+          {/* <SidebarRail /> */}
         </Sidebar>
       </div>
     </>

@@ -42,33 +42,31 @@ import { useCategoriesQuery } from "@/entities/category/hooks/query/use-get-cate
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CategoriesPage() {
-  // Custom hooks
   const { data: categories = [], isLoading, refetch } = useCategoriesQuery();
   const createCategoryMutation = useCreateCategoryMutation();
   const updateCategoryMutation = useUpdateCategoryMutation();
   const deleteCategoryMutation = useDeleteCategoryMutation();
   const { toast } = useToast();
 
-  // Local state
   const [searchTerm, setSearchTerm] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
 
-  // Filter categories based on search term
   const filteredCategories = categories.filter((category: Category) =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddCategory = async (categoryData: { name: string }) => {
     try {
+      // @ts-ignore
       await createCategoryMutation.mutate(categoryData);
       toast({
         title: "Категория добавлена",
         description: `Категория "${categoryData.name}" успешно добавлена.`,
       });
       setAddDialogOpen(false);
-      refetch(); // Refresh the categories list
+      refetch();
     } catch (error) {
       console.error("Error with adding category:", error);
       toast({
@@ -82,14 +80,18 @@ export default function CategoriesPage() {
   const handleUpdateCategory = async (categoryData: { name: string }) => {
     if (currentCategory) {
       try {
-        await updateCategoryMutation.mutate(currentCategory.id, categoryData);
+        // @ts-ignore
+        await updateCategoryMutation.mutate({
+          id: currentCategory.id,
+          data: categoryData,
+        });
         toast({
           title: "Категория обновлена",
           description: `Категория "${categoryData.name}" успешно обновлена.`,
         });
         setEditDialogOpen(false);
         setCurrentCategory(null);
-        refetch(); // Refresh the categories list
+        refetch();
       } catch (error) {
         console.error("Error with updating category:", error);
         toast({
@@ -103,12 +105,13 @@ export default function CategoriesPage() {
 
   const handleDeleteCategory = async (id: number) => {
     try {
+      // @ts-ignore
       await deleteCategoryMutation.mutate(id);
       toast({
         title: "Категория удалена",
         description: "Категория успешно удалена.",
       });
-      refetch(); // Refresh the categories list
+      refetch();
     } catch (error) {
       console.error("Error with deleting category:", error);
       toast({
@@ -124,7 +127,6 @@ export default function CategoriesPage() {
     setEditDialogOpen(true);
   };
 
-  // Skeleton loader component for table rows
   const TableRowSkeleton = () => (
     <TableRow className="animate-pulse">
       <TableCell>
@@ -147,7 +149,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="w-full">
-      <div className="max-w-7xl  w-full mx-auto">
+      <div className="max-w-7xl w-full mx-auto py-8 px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Категории</h1>
@@ -177,7 +179,6 @@ export default function CategoriesPage() {
             </DialogContent>
           </Dialog>
         </div>
-
         <div className="flex items-center justify-between mb-6">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -189,7 +190,6 @@ export default function CategoriesPage() {
             />
           </div>
         </div>
-
         <Card>
           <CardContent className="p-5">
             <Table className="w-full">
@@ -205,7 +205,6 @@ export default function CategoriesPage() {
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  // Skeleton loading state
                   Array.from({ length: 5 }).map((_, index) => (
                     <TableRowSkeleton key={index} />
                   ))
@@ -222,7 +221,6 @@ export default function CategoriesPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  // Actual data
                   filteredCategories.map((category: Category) => (
                     <TableRow key={category.id}>
                       <TableCell className="font-medium">
@@ -290,8 +288,6 @@ export default function CategoriesPage() {
             </Table>
           </CardContent>
         </Card>
-
-        {/* Edit Category Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>

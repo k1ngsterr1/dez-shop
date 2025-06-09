@@ -14,14 +14,17 @@ function MainContent({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={`flex-1 w-0 ${
-        isOpen ? "md:ml-[400px]" : ""
-      } transition-all duration-300`}
+        // Adjusted margin to match sidebar width (250px)
+        isOpen ? "md:ml-[150px]" : "md:ml-0" // Assuming sidebar is 250px
+      } transition-margin duration-300`} // Changed transition to margin
     >
-      <main className="h-full p-6">{children}</main>
+      {/* Added overflow-x-hidden here to prevent scroll from this div */}
+      <main className="h-full p-6 overflow-y-auto overflow-x-hidden">
+        {children}
+      </main>
     </div>
   );
 }
-
 export default function AdminLayout({
   children,
 }: {
@@ -32,7 +35,7 @@ export default function AdminLayout({
       <body>
         <AuthGuard requiredRole="ADMIN">
           <SidebarProvider defaultOpen={true}>
-            <div className="flex min-h-screen w-full">
+            <div className="flex min-h-screen w-full overflow-x">
               <AdminSidebar />
               <MainContent>{children}</MainContent>
             </div>
