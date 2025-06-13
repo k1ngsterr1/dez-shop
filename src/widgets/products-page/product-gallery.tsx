@@ -24,7 +24,7 @@ export function ProductGallery({
     <div className="space-y-4">
       <div className="relative aspect-square rounded-lg overflow-hidden border border-border">
         <Image
-          src={images[activeImage] || "/placeholder.svg"}
+          src={images[activeImage] || images[0]}
           alt={productName}
           fill
           className="object-cover"
