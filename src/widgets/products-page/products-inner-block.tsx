@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -15,6 +15,12 @@ import { ProductTabs } from "./product-tabs";
 export default function ProductDetailPage() {
   const params = useParams();
   const productId = Number(params?.id);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [activeImage, setActiveImage] = useState(0);
+  const handleChangeId = (id: number) => {
+    setSelectedId(id);
+    setActiveImage(id);
+  };
 
   const { data: product, isLoading, error } = useProductQuery(productId);
 
@@ -60,7 +66,7 @@ export default function ProductDetailPage() {
   // Construct links for breadcrumbs
   const categoryLink = `/category/${encodeURIComponent(product.category)}`;
   const subcategoryLink = product.subcategory
-    ? `${categoryLink}/${encodeURIComponent(product.subcategory)}`
+    ? `/subcategory/${encodeURIComponent(product.subcategory)}`
     : undefined;
 
   return (
@@ -77,9 +83,12 @@ export default function ProductDetailPage() {
           images={product.images}
           productName={product.name}
           isNew={isNewProduct}
+          selectedId={selectedId}
+          activeImage={activeImage}
+          setActiveImage={setActiveImage}
         />
         <div className="flex flex-col justify-between">
-          <ProductInfo product={product} />
+          <ProductInfo product={product} handleChangeId={handleChangeId} />
           <ProductActions
             expiry={product.expiry}
             isInStock={product.isInStock}

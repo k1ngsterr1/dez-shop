@@ -8,16 +8,18 @@ interface ProductGalleryProps {
   images: string[];
   productName: string;
   isNew?: boolean;
-  // discount prop removed as it's not in the DTO
+  selectedId: number | null;
+  activeImage: number;
+  setActiveImage: (index: number) => void;
 }
 
 export function ProductGallery({
   images,
   productName,
   isNew,
+  activeImage,
+  setActiveImage,
 }: ProductGalleryProps) {
-  const [activeImage, setActiveImage] = useState(0);
-
   return (
     <div className="space-y-4">
       <div className="relative aspect-square rounded-lg overflow-hidden border border-border">

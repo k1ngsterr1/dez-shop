@@ -17,6 +17,7 @@ import { Check } from "lucide-react";
 
 interface ProductInfoProps {
   product: Product;
+  handleChangeId: (id: number) => void;
 }
 
 const parseProductItems = (itemsJson: string): Item[] => {
@@ -37,7 +38,10 @@ const parseProductItems = (itemsJson: string): Item[] => {
   }
 };
 
-const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
+const ProductInfo: React.FC<ProductInfoProps> = ({
+  product,
+  handleChangeId,
+}) => {
   const items = useMemo(
     () => parseProductItems(product.items),
     [product.items]
@@ -52,9 +56,9 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
     }
   }, [items]);
 
-  const handleItemChange = (volume: string) => {
-    const newItem = items.find((item) => item.volume === volume) || null;
-    setSelectedItem(newItem);
+  const handleItemChange = (id: string) => {
+    setSelectedItem(items[Number(id)]);
+    handleChangeId(Number(id));
   };
 
   const displayItem = items.length === 1 ? items[0] : selectedItem;
@@ -92,7 +96,11 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
             Выберите объем:
           </Label>
           <Select
-            value={selectedItem?.volume || ""}
+            value={
+              selectedItem
+                ? String(items.findIndex((i) => i === selectedItem))
+                : ""
+            }
             onValueChange={handleItemChange}
           >
             <SelectTrigger id="item-select" className="w-full md:w-[200px]">
@@ -100,7 +108,10 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
             </SelectTrigger>
             <SelectContent>
               {items.map((item, index) => (
-                <SelectItem key={`${item.volume}-${index}`} value={item.volume}>
+                <SelectItem
+                  key={`${item.volume}-${index}`}
+                  value={String(index)}
+                >
                   {item.volume}
                 </SelectItem>
               ))}
