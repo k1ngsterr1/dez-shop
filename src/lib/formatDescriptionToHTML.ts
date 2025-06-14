@@ -330,5 +330,21 @@ export function formatDescriptionToHTML(text: string): string {
     /(<span class="text-sm">[^<]+)\.<br>\s*<ul/g,
     "$1<br><ul"
   );
+  // --- Секции для дезинфекции и стерилизации инструментов ---
+  html = html.replace(
+    /Используется для дезинфекции резинового и пластмассового оборудования[^.]+\./i,
+    '<br/><br/><strong>Назначение:</strong> <span class="text-sm">$&</span><br>'
+  );
+  html = html.replace(
+    /(<span class="font-semibold">[^<]+<\/span><br>)([\s\S]*?)(?=<br><span class="font-semibold">|<br><strong>|$)/g,
+    (match, header, items) => {
+      const lis = items
+        .split(/<li>/)
+        .slice(1)
+        .map((i) => "<li>" + i)
+        .join("");
+      return header + '<ul class="list-disc pl-6 mt-2">' + lis + "</ul>";
+    }
+  );
   return html;
 }

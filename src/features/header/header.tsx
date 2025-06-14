@@ -170,7 +170,7 @@ export function Header() {
               <Link href="/" className="mr-8 flex items-center">
                 <Image
                   alt="Profdez.kz"
-                  src="logo.svg"
+                  src="/logo.svg"
                   width={205}
                   height={102}
                 />

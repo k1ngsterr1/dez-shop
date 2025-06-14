@@ -140,7 +140,11 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
             .replace(/(\d+\.\d+\.[^<]+:)/g, "<br/><br/><b>$1</b>")
             .replace(/(Рекомендации:)/g, "<br/><br/><b>$1</b>")
             .replace(/(Токсичность:)/g, "<br/><br/><b>$1</b>")
-            .replace(/(Безопасность:)/g, "<br/><br/><b>$1</b>"),
+            .replace(/(Безопасность:)/g, "<br/><br/><b>$1</b>")
+            .replace(
+              /<strong>Области применения:<\/strong><br>/g,
+              "<strong>Области применения:</strong><br><br>"
+            ),
         }}
       />
     </div>
