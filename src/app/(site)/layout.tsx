@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "ProfDez - Профессиональные дезинфицирующие средства",
   description:
     "Профессиональные дезинфицирующие и моющие средства в Казахстане",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -22,6 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
