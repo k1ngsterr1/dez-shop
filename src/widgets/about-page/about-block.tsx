@@ -42,8 +42,6 @@ export function AboutBlock() {
           </p>
         </div>
       </div>
-
-      {/* Company Values */}
       <div className="mb-16">
         <div className="mb-8 text-center">
           <h2 className="mb-2 text-2xl font-bold">Наши ценности</h2>
