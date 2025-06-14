@@ -15,6 +15,7 @@ import Link from "next/link";
 import type React from "react";
 import { useMemo } from "react";
 import type { Item } from "../dto/product.dto";
+import { useRouter } from "next/navigation";
 
 interface IProductCard {
   product: {
@@ -44,6 +45,7 @@ const getFirstItem = (itemsJson: string): Item | null => {
 
 export const ProductCard: React.FC<IProductCard> = ({ product }) => {
   const { openContactForm } = useContactFormStore();
+  const navigate = useRouter();
 
   const firstItem = useMemo(() => getFirstItem(product.items), [product.items]);
   // Determine if the product is new (e.g., created in the last 7 days)
@@ -56,7 +58,8 @@ export const ProductCard: React.FC<IProductCard> = ({ product }) => {
   return (
     <Card
       key={product.id}
-      className="group overflow-hidden transition-all hover:shadow-md flex flex-col"
+      onClick={() => navigate.push(`/product/${product.id}`)}
+      className="group cursor-pointer overflow-hidden transition-all hover:shadow-md flex flex-col"
     >
       <div className="relative">
         <div className="relative aspect-square overflow-hidden">

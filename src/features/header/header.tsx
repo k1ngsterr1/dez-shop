@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-// fix fix
+
 import {
   Facebook,
   Instagram,
@@ -79,7 +79,6 @@ export function Header() {
 
   const handleProductClick = (productId: string) => {
     setShowResults(false);
-    // Navigate to product page
     window.location.href = `/product/${productId}`;
   };
 
@@ -87,6 +86,27 @@ export function Header() {
     products?.filter((product: Product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
+
+  // Parse items JSON and get min price for display
+  function getMinPrice(items: string | undefined) {
+    if (!items) return null;
+    try {
+      const parsed = JSON.parse(items);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return Math.min(...parsed.map((i) => i.price));
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  }
+
+  function getFirstImage(images: string[] | undefined) {
+    if (Array.isArray(images) && images.length > 0) {
+      return images[0];
+    }
+    return "/placeholder.svg?height=48&width=48&query=product";
+  }
 
   return (
     <header
@@ -148,11 +168,12 @@ export function Header() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center">
               <Link href="/" className="mr-8 flex items-center">
-                <div className="text-2xl font-bold">
-                  <span className="text-primary">PROF</span>
-                  <span className="text-primary/80">DEZ</span>
-                  <span className="text-sm text-primary/60">.kz</span>
-                </div>
+                <Image
+                  alt="Profdez.kz"
+                  src="logo.svg"
+                  width={205}
+                  height={102}
+                />
               </Link>
               <div className="hidden md:block">
                 <div className="flex flex-col space-y-1">
@@ -215,39 +236,42 @@ export function Header() {
                         </div>
                       ) : filteredProducts.length > 0 ? (
                         <div className="py-2">
-                          {filteredProducts.map((product: Product) => (
-                            <div
-                              key={product.id}
-                              className="flex items-center gap-3 px-4 py-2 hover:bg-accent cursor-pointer"
-                              onClick={() => handleProductClick(product.id)}
-                            >
-                              <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border">
-                                <Image
-                                  src={
-                                    product.image ||
-                                    "/placeholder.svg?height=48&width=48&query=product" ||
-                                    "/placeholder.svg"
-                                  }
-                                  alt={product.name}
-                                  width={48}
-                                  height={48}
-                                  className="h-full w-full object-cover object-center"
-                                />
+                          {filteredProducts.map((product: any) => {
+                            const minPrice = getMinPrice(product.items);
+                            const imageUrl = getFirstImage(product.images);
+                            return (
+                              <div
+                                key={product.id}
+                                className="flex items-center gap-3 px-4 py-2 hover:bg-accent cursor-pointer"
+                                onClick={() => handleProductClick(product.id)}
+                              >
+                                <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border bg-white">
+                                  <Image
+                                    src={imageUrl}
+                                    alt={product.name}
+                                    width={48}
+                                    height={48}
+                                    className="h-full w-full object-cover object-center"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate">
+                                    {product.name}
+                                  </p>
+                                  {minPrice !== null && (
+                                    <p className="text-sm text-primary font-semibold">
+                                      от{" "}
+                                      {new Intl.NumberFormat("ru-KZ", {
+                                        style: "currency",
+                                        currency: "KZT",
+                                        maximumFractionDigits: 0,
+                                      }).format(minPrice)}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">
-                                  {product.name}
-                                </p>
-                                <p className="text-sm text-primary font-semibold">
-                                  {new Intl.NumberFormat("ru-KZ", {
-                                    style: "currency",
-                                    currency: "KZT",
-                                    maximumFractionDigits: 0,
-                                  }).format(product.price)}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       ) : (
                         <div className="p-4 text-center text-sm text-muted-foreground">
@@ -286,7 +310,6 @@ export function Header() {
                           Навигация и контактная информация
                         </SheetDescription>
                       </SheetHeader>
-
                       <div className="flex flex-col space-y-6">
                         <div className="space-y-3">
                           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">

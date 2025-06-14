@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import type { Product, Item } from "@/entities/product/dto/product.dto";
 import { formatPrice } from "@/lib/format-price";
 import { Check } from "lucide-react";
+import { formatDescriptionToHTML } from "@/lib/formatDescriptionToHTML";
 
 interface ProductInfoProps {
   product: Product;
@@ -70,13 +71,12 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           <span>{product.category}</span>
-          {product.subcategory &&
-            product.subcategory !== "" && ( // Display subcategory if it exists
-              <>
-                <span className="mx-1">/</span>
-                <span>{product.subcategory}</span>
-              </>
-            )}
+          {product.subcategory && product.subcategory !== "" && (
+            <>
+              <span className="mx-1">/</span>
+              <span>{product.subcategory}</span>
+            </>
+          )}
         </div>
         {product.isInStock ? (
           <Badge
@@ -89,7 +89,6 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           <Badge variant="destructive">Нет в наличии</Badge>
         )}
       </div>
-
       {items.length > 1 && (
         <div className="space-y-2">
           <Label htmlFor="item-select" className="text-sm font-medium">
@@ -119,7 +118,6 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           </Select>
         </div>
       )}
-
       {displayItem ? (
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-bold text-primary">
@@ -134,10 +132,17 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           Цена по запросу
         </div>
       )}
-
-      <p className="text-muted-foreground pt-4 border-t">
-        {product.description}
-      </p>
+      <div
+        className="text-muted-foreground pt-4 border-t prose prose-neutral max-w-full whitespace-normal break-words overflow-wrap-anywhere"
+        style={{ whiteSpace: "pre-line" }}
+        dangerouslySetInnerHTML={{
+          __html: formatDescriptionToHTML(product.description)
+            .replace(/(\d+\.\d+\.[^<]+:)/g, "<br/><br/><b>$1</b>")
+            .replace(/(Рекомендации:)/g, "<br/><br/><b>$1</b>")
+            .replace(/(Токсичность:)/g, "<br/><br/><b>$1</b>")
+            .replace(/(Безопасность:)/g, "<br/><br/><b>$1</b>"),
+        }}
+      />
     </div>
   );
 };

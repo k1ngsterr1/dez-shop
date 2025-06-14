@@ -1,4 +1,6 @@
+import React from "react";
 import { Shield } from "lucide-react";
+import { formatDescriptionToHTML } from "@/lib/formatDescriptionToHTML";
 
 interface ProductFeaturesTabProps {
   description: string;
@@ -12,17 +14,12 @@ export function ProductFeaturesTab({ description }: ProductFeaturesTabProps) {
           <Shield className="h-5 w-5 text-primary" />
           Подробное описание
         </h3>
-        <p
-          className="whitespace-normal break-words overflow-wrap-anywhere max-w-full"
-          style={{
-            wordWrap: "break-word",
-            overflowWrap: "break-word",
-            whiteSpace: "pre-wrap",
-            hyphens: "auto",
+        <div
+          className="prose prose-neutral max-w-full whitespace-normal break-words overflow-wrap-anywhere space-y-6"
+          dangerouslySetInnerHTML={{
+            __html: formatDescriptionToHTML(description),
           }}
-        >
-          {description}
-        </p>
+        />
         <div className="space-y-4"></div>
       </div>
     </div>

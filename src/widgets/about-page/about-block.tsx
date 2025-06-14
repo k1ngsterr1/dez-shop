@@ -26,8 +26,8 @@ export function AboutBlock() {
       </div>
 
       {/* Company Overview */}
-      <div className="mb-16 grid items-center gap-8 md:grid-cols-2">
-        <div className="order-2 md:order-1">
+      <div className="mb-16 flex flex-col items-center justify-center text-center">
+        <div className="max-w-2xl">
           <h2 className="mb-4 text-2xl font-bold text-primary">Наша миссия</h2>
           <p className="mb-4 text-muted-foreground">
             Компания ProfDez была основана в 2005 году с целью обеспечения
@@ -40,17 +40,6 @@ export function AboutBlock() {
             безопасные решения для дезинфекции и гигиены, соответствующие
             международным стандартам качества и безопасности.
           </p>
-          <Button size="lg">Связаться с нами</Button>
-        </div>
-        <div className="order-1 md:order-2">
-          <div className="relative aspect-video overflow-hidden rounded-lg">
-            <Image
-              src="/placeholder.svg?height=400&width=600"
-              alt="Офис компании ProfDez"
-              fill
-              className="object-cover"
-            />
-          </div>
         </div>
       </div>
 

@@ -13,7 +13,7 @@ export function ProductActions({ expiry }: ProductActionsProps) {
   const { openContactForm } = useContactFormStore();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-4">
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div className="flex items-center gap-2">
           <Truck className="h-5 w-5 text-primary" />

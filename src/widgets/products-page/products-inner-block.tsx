@@ -32,7 +32,6 @@ export default function ProductDetailPage() {
   }, [product]);
 
   if (!productId && !isLoading) {
-    // Check productId only if not loading
     return (
       <div className="container w-full mx-auto px-4 py-8">
         <Alert variant="destructive">
@@ -63,7 +62,6 @@ export default function ProductDetailPage() {
     );
   }
 
-  // Construct links for breadcrumbs
   const categoryLink = `/category/${encodeURIComponent(product.category)}`;
   const subcategoryLink = product.subcategory
     ? `/subcategory/${encodeURIComponent(product.subcategory)}`
@@ -75,7 +73,7 @@ export default function ProductDetailPage() {
         productName={product.name}
         categoryName={product.category}
         categoryLink={categoryLink}
-        subcategoryName={product.subcategory || undefined} // Pass undefined if empty string
+        subcategoryName={product.subcategory || undefined}
         subcategoryLink={subcategoryLink}
       />
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
@@ -116,21 +114,18 @@ function ProductDetailSkeleton() {
           <Skeleton className="h-8 w-1/4" /> {/* Price */}
           <div className="space-y-3 mt-6">
             {" "}
-            {/* Description */}
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-5/6" />
             <Skeleton className="h-5 w-3/4" />
           </div>
           <div className="pt-6">
             {" "}
-            {/* Actions */}
             <Skeleton className="h-12 w-full md:w-1/2" />
           </div>
         </div>
       </div>
       <div>
         {" "}
-        {/* Tabs */}
         <div className="border-b mb-6">
           <Skeleton className="h-10 w-1/3 md:w-1/4" />
         </div>

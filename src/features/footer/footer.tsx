@@ -21,19 +21,15 @@ export function Footer() {
             </p>
             <div className="mt-4 flex space-x-4">
               <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary"
-              >
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link
-                href="#"
+                href="https://www.facebook.com/prof.dez.2025/"
+                target="_blank"
                 className="text-muted-foreground hover:text-primary"
               >
                 <Facebook className="h-5 w-5" />
               </Link>
               <Link
-                href="#"
+                href="https://www.instagram.com/profdez.kz/"
+                target="_blank"
                 className="text-muted-foreground hover:text-primary"
               >
                 <Instagram className="h-5 w-5" />
@@ -83,21 +79,28 @@ export function Footer() {
               </li>
               <li className="flex items-start">
                 <MapPin className="mr-2 mt-0.5 h-4 w-4 text-primary" />
-                <div>г. Алматы, ул. Примерная, 123</div>
+                <div>
+                  <a
+                    href="https://yandex.kz/maps/162/almaty/?ll=76.934417%2C43.252427&z=16&mode=search&text=%D0%B6%D0%B0%D0%BC%D0%B1%D1%8B%D0%BB%D0%B0%20114%20%D0%B0%D0%BB%D0%BC%D0%B0%D1%82%D1%8B"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline text-primary"
+                  >
+                    г. Алматы, ул. Жамбыла, 114, офис 1
+                  </a>
+                </div>
               </li>
             </ul>
           </div>
         </div>
-
         <div className="mt-12 border-t pt-6  text-center text-sm text-muted-foreground">
           <span className="mb-4">
-            Разработано в
+            Разработано в{" "}
             <a
               href="https://sparkstudio.kz/"
               target="_blank"
               className="text-primary"
             >
-              {" "}
               Spark Studio
             </a>
           </span>

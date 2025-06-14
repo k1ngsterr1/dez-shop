@@ -124,7 +124,6 @@ export function HeroSection() {
               </div>
 
               {/* Decorative diagonal line */}
-              <div className="absolute top-[-10%] right-[-10%] w-[120%] h-[10%] bg-primary/5 rotate-45 blur-md"></div>
               <div className="absolute bottom-[-10%] left-[-10%] w-[120%] h-[10%] bg-primary/5 rotate-45 blur-md"></div>
 
               {/* Floating badges - Redesigned for mobile */}
