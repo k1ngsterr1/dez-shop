@@ -131,11 +131,8 @@ export default function ProductsPage() {
   const handleUpdateProduct = async (productData: ProductWithImages) => {
     if (currentProduct) {
       try {
-        // @ts-ignore
-        await updateProductMutation.mutate({
-          id: currentProduct.id,
-          productData,
-        });
+        console.log(productData);
+        await updateProductMutation.mutate(currentProduct.id, productData);
         toast({
           title: "Продукт обновлен",
           description: `Продукт "${
@@ -582,7 +579,7 @@ export default function ProductsPage() {
           </Card>
         </div>
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="sm:max-w-[600px] w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[600px] w-[calc(100%-2rem)] max-h-[90vh] overflow-y-hidden">
             <DialogHeader>
               <DialogTitle>Редактировать продукт</DialogTitle>
               <DialogDescription>

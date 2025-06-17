@@ -50,9 +50,7 @@ const ACCEPTED_IMAGE_TYPES = [
 ];
 
 const itemSchema = z.object({
-  price: z.coerce
-    .number()
-    .min(0, { message: "Цена не может быть отрицательной" }),
+  price: z.coerce.number(),
   volume: z.string().min(1, { message: "Укажите объем" }),
 });
 

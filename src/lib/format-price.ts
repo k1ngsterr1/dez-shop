@@ -14,6 +14,10 @@ export function formatPrice(
     maximumFractionDigits = 2, // Allow up to 2 decimals if price has them
   } = options || {};
 
+  if (price < 0) {
+    return "Цена по запросу";
+  }
+
   // Use a locale that uses dot as a thousands separator, like 'de-DE'
   // Then, we can manually append the correct currency symbol if needed,
   // or rely on the fact that we only want the number formatting.
