@@ -12,10 +12,20 @@ export function HomePageClient() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading time - you can replace this with actual data loading logic
+    // Check if user has already visited
+    const visited =
+      typeof window !== "undefined" && localStorage.getItem("dezshop_visited");
+    if (visited) {
+      setIsLoading(false);
+      return;
+    }
+    // Simulate loading time
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 3000); // Show loader for 3 seconds
+      if (typeof window !== "undefined") {
+        localStorage.setItem("dezshop_visited", "1");
+      }
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);
