@@ -65,12 +65,21 @@ export function ContactsBlock() {
           <ul className="space-y-3">
             <li className="flex items-center">
               <Mail className="mr-2 h-4 w-4 text-primary" />
+              <a href="mailto:info@profdez.kz" className="hover:text-primary">
+                info@profdez.kz
+              </a>
+            </li>
+            <li className="flex items-center">
+              <Mail className="mr-2 h-4 w-4 text-primary" />
               <a
                 href="mailto:vitaliy@vmpharm.net"
                 className="hover:text-primary"
               >
                 vitaliy@vmpharm.net
               </a>
+              <span className="ml-2 text-sm text-muted-foreground">
+                (Виталий, менеджер)
+              </span>
             </li>
           </ul>
         </ContactCard>
@@ -107,10 +116,6 @@ export function ContactsBlock() {
             <div>
               <p className="font-medium">Казахстан, г. Алматы</p>
               <p>ул. Затаевича, 49</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Юридический адрес: Проспект Сейфуллина, дом 404/67, офис 312,
-                корпус 1
-              </p>
             </div>
           </div>
         </ContactCard>

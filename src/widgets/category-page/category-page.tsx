@@ -30,6 +30,16 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
     }
   }, [categories, slug]);
 
+  // Группируем продукты по подкатегории
+  const subcategoryMap: Record<string, any[]> = {};
+  if (products && products.length > 0) {
+    products.forEach((product) => {
+      const subcat = product.subcategory || "Без подкатегории";
+      if (!subcategoryMap[subcat]) subcategoryMap[subcat] = [];
+      subcategoryMap[subcat].push(product);
+    });
+  }
+
   // Loading state
   if (isLoading) {
     return (
@@ -100,6 +110,11 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
             <h1 className="mb-2 text-3xl font-bold">
               {categoryName || "Категория"}
             </h1>
+            {products && products[0]?.subcategory && (
+              <p className="mb-1 text-lg font-semibold text-primary">
+                {products[0].subcategory}
+              </p>
+            )}
             <p className="text-muted-foreground">
               {categoryName
                 ? `Профессиональные средства из категории "${categoryName}"`
@@ -110,9 +125,18 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
       </Card>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {products && products.length > 0 ? (
-          products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+        {products && Object.keys(subcategoryMap).length > 0 ? (
+          Object.entries(subcategoryMap).map(([subcat, prods]) => (
+            <div key={subcat} className="col-span-full mb-6">
+              <h2 className="mb-2 text-xl font-semibold text-primary">
+                {subcat}
+              </h2>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {prods.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </div>
           ))
         ) : (
           <Card className="col-span-full overflow-hidden">

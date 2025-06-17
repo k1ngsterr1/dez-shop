@@ -54,15 +54,13 @@ export function HeroSection() {
                 : "opacity-0 -translate-x-8"
             }`}
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-5xl font-bold tracking-tight mb-4 md:mb-6 leading-tight">
-              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/90">
-                Профессиональные
-              </span>
-              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold tracking-tight mb-4 md:mb-6 leading-tight">
+              <span className="block">Профессиональные</span>
+              <span className="block text-primary">
                 дезинфицирующие средства
               </span>
             </h1>
-            <p className="mb-6 md:mb-8 text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+            <p className="mb-6 md:mb-8 text-base md:text-lg lg:text-xl text-muted-foreground leading-relaxed">
               Широкий ассортимент высококачественных дезинфицирующих и моющих
               средств для медицинских учреждений, пищевой промышленности и
               бытового использования.

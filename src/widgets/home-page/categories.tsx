@@ -1,17 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Droplets, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { Droplets, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useCategoriesQuery } from "@/entities/category/hooks/query/use-get-categories.query";
 import type { Subcategory } from "@/entities/subcategory/dto/subcategory.dto";
 import { useMemo, useState } from "react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { useSubcategoriesQuery } from "@/entities/subcategory/hooks/query/use-get-subcategories.query";
 
@@ -99,61 +94,31 @@ export function Categories() {
         {categories?.map((category) => {
           const categorySubcategories =
             subcategoriesByCategoryId.get(category.id) || [];
-          const isOpen = openCategories[category.id] || false;
           return (
             <li key={category.id}>
-              <Collapsible
-                open={isOpen}
-                onOpenChange={() => toggleCategory(category.id)}
-              >
-                <div className="flex items-center justify-between rounded-md transition-colors hover:bg-muted">
-                  {/* UPDATED LINK FOR CATEGORY */}
-                  <Link
-                    href={`/category/${encodeURIComponent(category.name)}`}
-                    className="flex flex-1 items-center p-2 text-sm"
-                  >
-                    <Droplets className="mr-2 h-4 w-4 text-primary" />
-                    <span>{category.name}</span>
-                  </Link>
-                  {categorySubcategories.length > 0 && (
-                    <CollapsibleTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-1 h-auto mr-1"
+              <div className="flex items-center justify-between rounded-md transition-colors hover:bg-muted">
+                <Link
+                  href={`/category/${encodeURIComponent(category.name)}`}
+                  className="flex flex-1 items-center p-2 text-sm"
+                >
+                  <Droplets className="mr-2 h-4 w-4 text-primary" />
+                  <span>{category.name}</span>
+                </Link>
+              </div>
+              {categorySubcategories.length > 0 && (
+                <ul className="pl-6 pt-1 space-y-1 border-l border-border ml-3 my-1">
+                  {categorySubcategories.map((sub) => (
+                    <li key={sub.id}>
+                      <Link
+                        href={`/subcategory/${encodeURIComponent(sub.name)}`}
+                        className="flex items-center rounded-md p-1.5 text-xs transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
                       >
-                        {isOpen ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                        <span className="sr-only">
-                          {isOpen ? "Свернуть" : "Развернуть"}
-                        </span>
-                      </Button>
-                    </CollapsibleTrigger>
-                  )}
-                </div>
-                {categorySubcategories.length > 0 && (
-                  <CollapsibleContent>
-                    <ul className="pl-6 pt-1 space-y-1 border-l border-border ml-3 my-1">
-                      {categorySubcategories.map((sub) => (
-                        <li key={sub.id}>
-                          {/* UPDATED LINK FOR SUBCATEGORY */}
-                          <Link
-                            href={`/subcategory/${encodeURIComponent(
-                              sub.name
-                            )}`}
-                            className="flex items-center rounded-md p-1.5 text-xs transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
-                          >
-                            <span>{sub.name}</span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </CollapsibleContent>
-                )}
-              </Collapsible>
+                        <span>{sub.name}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           );
         })}
