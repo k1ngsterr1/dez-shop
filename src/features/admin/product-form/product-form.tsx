@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -381,37 +382,80 @@ export function ProductForm({
                             );
                           })}
                         </div>
-                        <Select
-                          onValueChange={(value) => {
-                            if (!field.value.includes(value)) {
-                              field.onChange([...field.value, value]);
-                            }
-                          }}
-                          disabled={isLoadingCategories}
-                        >
+                        <Select>
                           <SelectTrigger className="w-full">
                             <SelectValue
                               placeholder={
                                 isLoadingCategories
                                   ? "Загрузка категорий..."
-                                  : "Выберите категорию"
+                                  : field.value.length > 0
+                                  ? `Выбрано категорий: ${field.value.length}`
+                                  : "Выберите категории"
                               }
                             />
                           </SelectTrigger>
                           <SelectContent>
-                            {categories
-                              .filter(
-                                (cat) =>
-                                  !field.value.includes(cat.id.toString())
-                              )
-                              .map((cat: Category) => (
-                                <SelectItem
-                                  key={cat.id}
-                                  value={cat.id.toString()}
+                            <div className="p-2 space-y-2 max-h-60 overflow-y-auto">
+                              {categories.length > 0 && (
+                                <div className="flex gap-2 pb-2 border-b">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const allIds = categories.map((cat) =>
+                                        cat.id.toString()
+                                      );
+                                      field.onChange(allIds);
+                                    }}
+                                  >
+                                    Выбрать все
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => field.onChange([])}
+                                  >
+                                    Очистить
+                                  </Button>
+                                </div>
+                              )}
+                              {categories.map((category) => (
+                                <div
+                                  key={category.id}
+                                  className="flex items-center space-x-2"
                                 >
-                                  {cat.name}
-                                </SelectItem>
+                                  <Checkbox
+                                    id={`category-${category.id}`}
+                                    checked={field.value.includes(
+                                      category.id.toString()
+                                    )}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        field.onChange([
+                                          ...field.value,
+                                          category.id.toString(),
+                                        ]);
+                                      } else {
+                                        field.onChange(
+                                          field.value.filter(
+                                            (id) =>
+                                              id !== category.id.toString()
+                                          )
+                                        );
+                                      }
+                                    }}
+                                  />
+                                  <label
+                                    htmlFor={`category-${category.id}`}
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                                  >
+                                    {category.name}
+                                  </label>
+                                </div>
                               ))}
+                            </div>
                           </SelectContent>
                         </Select>
                       </div>
@@ -427,48 +471,39 @@ export function ProductForm({
                   <FormItem>
                     <FormLabel>Подкатегории</FormLabel>
                     <div className="space-y-2">
-                      <div className="flex flex-wrap gap-2">
-                        {field.value.map((subcategoryId) => {
-                          const subcategory = allSubcategories.find(
-                            (sub) => sub.id.toString() === subcategoryId
-                          );
-                          return (
-                            <div
-                              key={subcategoryId}
-                              className="flex items-center bg-secondary px-3 py-1 rounded-md text-sm"
-                            >
-                              <span>
-                                {subcategory?.name ||
-                                  "Неизвестная подкатегория"}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const newValue = field.value.filter(
-                                    (id) => id !== subcategoryId
-                                  );
-                                  field.onChange(newValue);
-                                }}
-                                className="ml-2 text-destructive hover:text-destructive/80"
+                      {field.value.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {field.value.map((subcategoryId) => {
+                            const subcategory = allSubcategories.find(
+                              (sub) => sub.id.toString() === subcategoryId
+                            );
+                            return (
+                              <div
+                                key={subcategoryId}
+                                className="flex items-center bg-secondary px-3 py-1 rounded-md text-sm"
                               >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <Select
-                        onValueChange={(value) => {
-                          if (!field.value.includes(value)) {
-                            field.onChange([...field.value, value]);
-                          }
-                        }}
-                        disabled={
-                          selectedCategoryObjects.length === 0 ||
-                          isLoadingSubcategories ||
-                          filteredSubcategories.length === 0
-                        }
-                      >
+                                <span>
+                                  {subcategory?.name ||
+                                    "Неизвестная подкатегория"}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newValue = field.value.filter(
+                                      (id) => id !== subcategoryId
+                                    );
+                                    field.onChange(newValue);
+                                  }}
+                                  className="ml-2 text-destructive hover:text-destructive/80"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      <Select>
                         <SelectTrigger className="w-full">
                           <SelectValue
                             placeholder={
@@ -478,23 +513,74 @@ export function ProductForm({
                                 ? "Загрузка подкатегорий..."
                                 : filteredSubcategories.length === 0
                                 ? "Нет подкатегорий"
-                                : "Выберите подкатегорию"
+                                : field.value.length > 0
+                                ? `Выбрано подкатегорий: ${field.value.length}`
+                                : "Выберите подкатегории"
                             }
                           />
                         </SelectTrigger>
                         <SelectContent>
-                          {filteredSubcategories
-                            .filter(
-                              (sub) => !field.value.includes(sub.id.toString())
-                            )
-                            .map((sub) => (
-                              <SelectItem
-                                key={sub.id}
-                                value={sub.id.toString()}
+                          <div className="p-2 space-y-2 max-h-60 overflow-y-auto">
+                            {filteredSubcategories.length > 0 && (
+                              <div className="flex gap-2 pb-2 border-b">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const allIds = filteredSubcategories.map(
+                                      (sub) => sub.id.toString()
+                                    );
+                                    field.onChange(allIds);
+                                  }}
+                                >
+                                  Выбрать все
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => field.onChange([])}
+                                >
+                                  Очистить
+                                </Button>
+                              </div>
+                            )}
+                            {filteredSubcategories.map((subcategory) => (
+                              <div
+                                key={subcategory.id}
+                                className="flex items-center space-x-2"
                               >
-                                {sub.name}
-                              </SelectItem>
+                                <Checkbox
+                                  id={`subcategory-${subcategory.id}`}
+                                  checked={field.value.includes(
+                                    subcategory.id.toString()
+                                  )}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      field.onChange([
+                                        ...field.value,
+                                        subcategory.id.toString(),
+                                      ]);
+                                    } else {
+                                      field.onChange(
+                                        field.value.filter(
+                                          (id) =>
+                                            id !== subcategory.id.toString()
+                                        )
+                                      );
+                                    }
+                                  }}
+                                />
+                                <label
+                                  htmlFor={`subcategory-${subcategory.id}`}
+                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                                >
+                                  {subcategory.name}
+                                </label>
+                              </div>
                             ))}
+                          </div>
                         </SelectContent>
                       </Select>
                     </div>
