@@ -155,10 +155,14 @@ export function ProductForm({
         console.error("Failed to parse items from initialData:", e);
       }
 
+      // Get category and subcategory names from the arrays
+      const categoryName = initialData.categories?.[0]?.name || "";
+      const subcategoryName = initialData.subcategories?.[0]?.name || "";
+
       form.reset({
         name: initialData.name || "",
-        category: initialData.category || "",
-        subcategory: initialData.subcategory || "", // Expects string, default to ""
+        category: categoryName,
+        subcategory: subcategoryName,
         description: initialData.description || "",
         items: parsedItems,
         expiry: initialData.expiry || undefined,
@@ -253,10 +257,26 @@ export function ProductForm({
     form.clearErrors("root.images" as any);
 
     try {
+      // Find category ID
+      const selectedCategory = categories.find(
+        (cat) => cat.name === data.category
+      );
+      const categoryIds = selectedCategory ? [selectedCategory.id] : [];
+
+      // Find subcategory ID
+      const selectedSubcategory = data.subcategory
+        ? allSubcategories.find((sub) => sub.name === data.subcategory)
+        : null;
+      const subcategoryIds = selectedSubcategory
+        ? [selectedSubcategory.id]
+        : [];
+
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("category", data.category);
       formData.append("subcategory", data.subcategory); // Will be "" if none selected
+      formData.append("categoryIds", JSON.stringify(categoryIds));
+      formData.append("subcategoryIds", JSON.stringify(subcategoryIds));
       formData.append("description", data.description);
       formData.append("items", JSON.stringify(data.items));
       if (data.expiry) formData.append("expiry", data.expiry);
@@ -271,8 +291,8 @@ export function ProductForm({
 
       const submissionObject: ProductWithImages = {
         name: data.name,
-        category: data.category,
-        subcategory: data.subcategory, // data.subcategory is already string (or "" )
+        categoryIds: categoryIds,
+        subcategoryIds: subcategoryIds,
         description: data.description,
         items: data.items,
         expiry: data.expiry,

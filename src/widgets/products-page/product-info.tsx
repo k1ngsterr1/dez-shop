@@ -76,11 +76,11 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
 
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          <span>{product.category}</span>
-          {product.subcategory && product.subcategory !== "" && (
+          <span>{product.categories?.[0]?.name || "Без категории"}</span>
+          {product.subcategories?.[0]?.name && (
             <>
               <span className="mx-1">/</span>
-              <span>{product.subcategory}</span>
+              <span>{product.subcategories[0].name}</span>
             </>
           )}
         </div>

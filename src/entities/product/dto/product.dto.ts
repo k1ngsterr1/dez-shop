@@ -48,6 +48,16 @@ export interface ProductFormValues {
 }
 
 // Для мутации:
-export interface ProductWithImages extends Partial<ProductFormValues> {
+export interface ProductWithImages {
+  name?: string;
+  description?: string;
+  isInStock?: boolean;
+  isPopular?: boolean;
+  expiry?: string;
+  items?: Item[];
   formData?: FormData;
+  images?: File[]; // New images to upload
+  existingImages?: string[]; // URLs of existing images to keep (used for updates)
+  categoryIds?: number[]; // Array of category IDs for backend
+  subcategoryIds?: number[]; // Array of subcategory IDs for backend
 }
