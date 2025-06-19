@@ -240,8 +240,9 @@ export default function ProductsPage() {
               <div>
                 <h3 className="font-medium">{product.name}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {product.category}{" "}
-                  {product.subcategory && ` / ${product.subcategory}`}
+                  {product.categories.map((c) => c.name).join(", ")}
+                  {product.subcategories.length > 0 &&
+                    ` / ${product.subcategories.map((s) => s.name).join(", ")}`}
                 </p>
               </div>
             </div>
