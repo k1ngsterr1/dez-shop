@@ -10,6 +10,7 @@ import { useCategoriesQuery } from "@/entities/category/hooks/query/use-get-cate
 import { useEffect, useState } from "react";
 import { useCategoryProductsQuery } from "@/entities/product/hooks/query/get-category-products";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Categories } from "@/widgets/home-page/categories";
 
 export function CategoryProductsContent({ slug }: { slug: string }) {
   const { data: products, isLoading, error } = useCategoryProductsQuery(slug);
@@ -98,55 +99,62 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <Card className="mb-8">
-        <CardContent className="p-6">
-          <Button asChild variant="ghost" className="mb-4">
-            <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Вернуться в каталог
-            </Link>
-          </Button>
-          <div>
-            <h1 className="mb-2 text-3xl font-bold">
-              {categoryName || "Категория"}
-            </h1>
-            {products && products[0]?.subcategory && (
-              <p className="mb-1 text-lg font-semibold text-primary">
-                {products[0].subcategory}
-              </p>
-            )}
-            <p className="text-muted-foreground">
-              {categoryName
-                ? `Профессиональные средства из категории "${categoryName}"`
-                : "Профессиональные средства из выбранной категории"}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {products && Object.keys(subcategoryMap).length > 0 ? (
-          Object.entries(subcategoryMap).map(([subcat, prods]) => (
-            <div key={subcat} className="col-span-full mb-6">
-              <h2 className="mb-2 text-xl font-semibold text-primary">
-                {subcat}
-              </h2>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {prods.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="lg:w-1/3 xl:w-1/4">
+          <Categories />
+        </div>
+        <div className="flex-1 min-w-0">
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <Button asChild variant="ghost" className="mb-4">
+                <Link href="/">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Вернуться в каталог
+                </Link>
+              </Button>
+              <div>
+                <h1 className="mb-2 text-3xl font-bold">
+                  {categoryName || "Категория"}
+                </h1>
+                {products && products[0]?.subcategory && (
+                  <p className="mb-1 text-lg font-semibold text-primary">
+                    {products[0].subcategory}
+                  </p>
+                )}
+                <p className="text-muted-foreground">
+                  {categoryName
+                    ? `Профессиональные средства из категории "${categoryName}"`
+                    : "Профессиональные средства из выбранной категории"}
+                </p>
               </div>
-            </div>
-          ))
-        ) : (
-          <Card className="col-span-full overflow-hidden">
-            <CardContent className="flex items-center justify-center p-12 text-center">
-              <p className="text-muted-foreground">
-                В данной категории товары не найдены
-              </p>
             </CardContent>
           </Card>
-        )}
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {products && Object.keys(subcategoryMap).length > 0 ? (
+              Object.entries(subcategoryMap).map(([subcat, prods]) => (
+                <div key={subcat} className="col-span-full mb-6">
+                  <h2 className="mb-2 text-xl font-semibold text-primary">
+                    {subcat}
+                  </h2>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    {prods.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <Card className="col-span-full overflow-hidden">
+                <CardContent className="flex items-center justify-center p-12 text-center">
+                  <p className="text-muted-foreground">
+                    В данной категории товары не найдены
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

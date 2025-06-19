@@ -36,6 +36,29 @@ export function Categories() {
     }, new Map<number, Subcategory[]>());
   }, [subcategoriesData]);
 
+  // Sort categories in the desired order (full names)
+  const sortedCategories = useMemo(() => {
+    if (!categories) return [];
+    const categoryOrder = [
+      "Антисептические средства",
+      "Моющие средства",
+      "Дезинфицирующие средства",
+      "Дозирующие устройства",
+    ];
+    return [...categories].sort((a, b) => {
+      const aIndex = categoryOrder.findIndex(
+        (order) => a.name.trim().toLowerCase() === order.toLowerCase()
+      );
+      const bIndex = categoryOrder.findIndex(
+        (order) => b.name.trim().toLowerCase() === order.toLowerCase()
+      );
+      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      return 0;
+    });
+  }, [categories]);
+
   const toggleCategory = (categoryId: number) => {
     setOpenCategories((prev) => ({ ...prev, [categoryId]: !prev[categoryId] }));
   };
@@ -91,7 +114,7 @@ export function Categories() {
     <div className="rounded-lg border bg-card p-4 shadow-sm">
       <h2 className="mb-4 text-xl font-bold text-primary">Категории</h2>
       <ul className="space-y-1">
-        {categories?.map((category) => {
+        {sortedCategories?.map((category) => {
           const categorySubcategories =
             subcategoriesByCategoryId.get(category.id) || [];
           return (
