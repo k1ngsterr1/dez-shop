@@ -497,7 +497,7 @@ export default function ProductsPage() {
                               {product.categories[0].name || "N/A"}
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
-                              {product.subcategories[0].name || "—"}
+                              {product?.subcategories[0]?.name || "—"}
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
                               {firstItem
