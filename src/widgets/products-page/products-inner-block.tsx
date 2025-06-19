@@ -64,7 +64,7 @@ export default function ProductDetailPage() {
 
   const categoryLink = `/category/${encodeURIComponent(product.category)}`;
   const subcategoryLink = product.subcategories[0]
-    ? `/subcategory/${encodeURIComponent(product.subcategories[0].name)}`
+    ? `/subcategory/${encodeURIComponent(product.subcategories[0]?.name)}`
     : undefined;
 
   return (
@@ -73,7 +73,7 @@ export default function ProductDetailPage() {
         productName={product.name}
         categoryName={product.categories[0].name}
         categoryLink={categoryLink}
-        subcategoryName={product.subcategories[0].name || undefined}
+        subcategoryName={product?.subcategories[0]?.name || undefined}
         subcategoryLink={subcategoryLink}
       />
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
