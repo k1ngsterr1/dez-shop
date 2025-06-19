@@ -165,6 +165,7 @@ export function ProductForm({
         initialData.categories?.map((cat) => cat.id.toString()) || [];
       const subcategoryIds =
         initialData.subcategories?.map((sub) => sub.id.toString()) || [];
+      console.log("HEHEHEHEHEHEHEH", initialData.name, subcategoryIds);
 
       form.reset({
         name: initialData.name || "",
@@ -185,22 +186,32 @@ export function ProductForm({
   }, [initialData, form]);
 
   useEffect(() => {
-    if (selectedCategoryIds.length > 0) {
-      const currentSubcategoryIds = form.getValues("subcategoryIds");
-      if (currentSubcategoryIds.length > 0) {
-        const validSubcategoryIds = currentSubcategoryIds.filter((subId) =>
-          filteredSubcategories.some((sub) => sub.id.toString() === subId)
-        );
-        if (validSubcategoryIds.length !== currentSubcategoryIds.length) {
-          form.setValue("subcategoryIds", validSubcategoryIds, {
-            shouldValidate: true,
-          });
-        }
-      }
-    } else {
+    // Ждём, когда подкатегории загрузятся
+    if (isLoadingSubcategories) return;
+
+    const current = form.getValues("subcategoryIds") || [];
+
+    // Если нет ни одной выбранной категории – сбросить
+    if (selectedCategoryIds.length === 0) {
       form.setValue("subcategoryIds", [], { shouldValidate: true });
+      return;
     }
-  }, [selectedCategoryIds, filteredSubcategories, form]);
+
+    // Иначе — фильтруем существующие
+    const valid = current.filter((subId) =>
+      filteredSubcategories.some((sub) => sub.id.toString() === subId)
+    );
+
+    // Если что-то изменилось – обновляем
+    if (valid.length !== current.length) {
+      form.setValue("subcategoryIds", valid, { shouldValidate: true });
+    }
+  }, [
+    selectedCategoryIds,
+    filteredSubcategories,
+    isLoadingSubcategories,
+    form,
+  ]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
