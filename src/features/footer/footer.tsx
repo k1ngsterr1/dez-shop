@@ -86,7 +86,7 @@ export function Footer() {
                     rel="noopener noreferrer"
                     className="hover:underline text-primary"
                   >
-                    г. Алматы, ул. Жамбыла, 114, офис 1
+                    Казахстан, г. Алматы ул. Затаевича, 49
                   </a>
                 </div>
               </li>

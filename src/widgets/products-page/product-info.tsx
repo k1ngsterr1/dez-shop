@@ -15,10 +15,13 @@ import type { Product, Item } from "@/entities/product/dto/product.dto";
 import { formatPrice } from "@/lib/format-price";
 import { Check } from "lucide-react";
 import { formatDescriptionToHTML } from "@/lib/formatDescriptionToHTML";
+import type { Dispatch, SetStateAction } from "react";
 
 interface ProductInfoProps {
   product: Product;
   handleChangeId: (id: number) => void;
+  activeImage: number;
+  setActiveImage: Dispatch<SetStateAction<number>>;
 }
 
 const parseProductItems = (itemsJson: string): Item[] => {
@@ -42,6 +45,8 @@ const parseProductItems = (itemsJson: string): Item[] => {
 const ProductInfo: React.FC<ProductInfoProps> = ({
   product,
   handleChangeId,
+  activeImage,
+  setActiveImage,
 }) => {
   const items = useMemo(
     () => parseProductItems(product.items),
@@ -51,15 +56,16 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
 
   useEffect(() => {
     if (items.length > 0) {
-      setSelectedItem(items[0]);
+      setSelectedItem(items[activeImage] || items[0]);
     } else {
       setSelectedItem(null);
     }
-  }, [items]);
+  }, [items, activeImage]);
 
   const handleItemChange = (id: string) => {
     setSelectedItem(items[Number(id)]);
     handleChangeId(Number(id));
+    setActiveImage(Number(id)); // sync image with item
   };
 
   const displayItem = items.length === 1 ? items[0] : selectedItem;

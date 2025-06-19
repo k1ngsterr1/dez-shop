@@ -86,7 +86,12 @@ export default function ProductDetailPage() {
           setActiveImage={setActiveImage}
         />
         <div className="flex flex-col justify-between">
-          <ProductInfo product={product} handleChangeId={handleChangeId} />
+          <ProductInfo
+            product={product}
+            handleChangeId={handleChangeId}
+            activeImage={activeImage}
+            setActiveImage={setActiveImage}
+          />
           <ProductActions
             expiry={product.expiry}
             isInStock={product.isInStock}
