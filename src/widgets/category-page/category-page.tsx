@@ -16,7 +16,7 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
   const { data: products, isLoading, error } = useCategoryProductsQuery(slug);
   const { data: categories } = useCategoriesQuery();
   const [categoryName, setCategoryName] = useState<string>("");
-
+  console.log(products ? products[0] : "");
   useEffect(() => {
     if (categories) {
       const decodedSlug = decodeURIComponent(slug);
@@ -35,7 +35,10 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
   const subcategoryMap: Record<string, any[]> = {};
   if (products && products.length > 0) {
     products.forEach((product) => {
-      const subcat = product.subcategory || "Без подкатегории";
+      const subcat =
+        product.subcategories?.length > 0
+          ? product.subcategories[0].name
+          : "Без подкатегории";
       if (!subcategoryMap[subcat]) subcategoryMap[subcat] = [];
       subcategoryMap[subcat].push(product);
     });
@@ -116,9 +119,9 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
                 <h1 className="mb-2 text-3xl font-bold">
                   {categoryName || "Категория"}
                 </h1>
-                {products && products[0]?.subcategory && (
+                {products && products[0]?.subcategories[0].name && (
                   <p className="mb-1 text-lg font-semibold text-primary">
-                    {products[0].subcategory}
+                    {products[0].subcategories[0].name}
                   </p>
                 )}
                 <p className="text-muted-foreground">

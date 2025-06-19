@@ -464,6 +464,7 @@ export default function ProductsPage() {
                     ) : (
                       filteredProducts.map((product) => {
                         const firstItem = getFirstItem(product);
+                        console.log(product);
                         return (
                           <TableRow key={`desktop-${product.id}`}>
                             <TableCell>
@@ -493,10 +494,10 @@ export default function ProductsPage() {
                               </div>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
-                              {product.category || "N/A"}
+                              {product.categories[0].name || "N/A"}
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
-                              {product.subcategory || "—"}
+                              {product.subcategories[0].name || "—"}
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
                               {firstItem
