@@ -24,7 +24,7 @@ interface IProductCard {
     // `items` is a JSON string from the backend
     items: string;
     images: string[];
-    category: string;
+    categories: any[];
     isPopular: boolean;
     isInStock: boolean;
     createdAt: Date; // Use createdAt to determine if it's new
@@ -90,7 +90,9 @@ export const ProductCard: React.FC<IProductCard> = ({ product }) => {
             {product.name}
           </h3>
         </Link>
-        <p className="text-xs text-muted-foreground">{product.category}</p>
+        <p className="text-xs text-muted-foreground">
+          {product.categories[0].name}
+        </p>
       </CardHeader>
 
       <CardContent className="p-4 pt-2 flex-grow">

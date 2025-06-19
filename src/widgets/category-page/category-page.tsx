@@ -140,7 +140,7 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
                   <h2 className="mb-2 text-xl font-semibold text-primary">
                     {subcat}
                   </h2>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {prods.map((product) => (
                       <ProductCard key={product.id} product={product} />
                     ))}

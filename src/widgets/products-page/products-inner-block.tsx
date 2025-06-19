@@ -63,17 +63,17 @@ export default function ProductDetailPage() {
   }
 
   const categoryLink = `/category/${encodeURIComponent(product.category)}`;
-  const subcategoryLink = product.subcategory
-    ? `/subcategory/${encodeURIComponent(product.subcategory)}`
+  const subcategoryLink = product.subcategories[0]
+    ? `/subcategory/${encodeURIComponent(product.subcategories[0].name)}`
     : undefined;
 
   return (
     <div className="container w-full mx-auto px-4 py-8">
       <ProductBreadcrumbs
         productName={product.name}
-        categoryName={product.category}
+        categoryName={product.categories[0].name}
         categoryLink={categoryLink}
-        subcategoryName={product.subcategory || undefined}
+        subcategoryName={product.subcategories[0].name || undefined}
         subcategoryLink={subcategoryLink}
       />
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">

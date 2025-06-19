@@ -76,7 +76,7 @@ export default function SubcategoryPage() {
               Профессиональные средства из подкатегории "{subcategoryName}"
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
             {products && products.length > 0 ? (
               products.map((product) => (
                 <ProductCard key={product.id} product={product} />
