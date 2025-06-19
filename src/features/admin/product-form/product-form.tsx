@@ -10,7 +10,7 @@ import {
   type SubmitHandler,
 } from "react-hook-form"; // Added Control, SubmitHandler
 import { z } from "zod";
-import { Trash2, Upload, Loader2, PlusCircle } from "lucide-react";
+import { Trash2, Upload, Loader2, PlusCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,15 +54,15 @@ const itemSchema = z.object({
   volume: z.string().min(1, { message: "Укажите объем" }),
 });
 
-// Adjusting subcategory to be z.string(), defaulting to ""
+// Adjusting to support multiple categories and subcategories
 const productFormSchema = z.object({
   name: z.string().min(2, {
     message: "Название должно содержать не менее 2 символов",
   }),
-  category: z.string().min(1, {
-    message: "Выберите категорию",
+  categoryIds: z.array(z.string()).min(1, {
+    message: "Выберите хотя бы одну категорию",
   }),
-  subcategory: z.string(), // Changed: now always a string, use "" for none
+  subcategoryIds: z.array(z.string()), // Can be empty array
   description: z.string().min(10, {
     message: "Описание должно содержать не менее 10 символов",
   }),
@@ -107,8 +107,8 @@ export function ProductForm({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: "",
-      category: "",
-      subcategory: "", // Default to empty string
+      categoryIds: [],
+      subcategoryIds: [],
       description: "",
       items: [{ price: 0, volume: "" }],
       expiry: undefined, // Explicitly undefined for optional field
@@ -118,25 +118,29 @@ export function ProductForm({
   });
 
   const { fields, append, remove } = useFieldArray({
-    control: form.control as Control<ProductFormValuesInternal>, // Explicit cast if needed
+    control: form.control,
     name: "items",
   });
 
-  const selectedCategoryName = form.watch("category");
+  const selectedCategoryIds = form.watch("categoryIds");
 
-  const selectedCategoryObject = useMemo(() => {
-    if (!selectedCategoryName || isLoadingCategories) return null;
-    return categories.find((cat) => cat.name === selectedCategoryName);
-  }, [selectedCategoryName, categories, isLoadingCategories]);
+  const selectedCategoryObjects = useMemo(() => {
+    if (!selectedCategoryIds.length || isLoadingCategories) return [];
+    return categories.filter((cat) =>
+      selectedCategoryIds.some((id) => cat.id.toString() === id)
+    );
+  }, [selectedCategoryIds, categories, isLoadingCategories]);
 
   const filteredSubcategories = useMemo(() => {
-    if (!selectedCategoryObject || isLoadingSubcategories) return [];
+    if (selectedCategoryObjects.length === 0 || isLoadingSubcategories)
+      return [];
     if (!Array.isArray(allSubcategories) || allSubcategories.length === 0)
       return [];
-    return allSubcategories.filter(
-      (sub) => sub.categoryId === selectedCategoryObject.id
+    const categoryIds = selectedCategoryObjects.map((cat) => cat.id);
+    return allSubcategories.filter((sub) =>
+      categoryIds.includes(sub.categoryId)
     );
-  }, [selectedCategoryObject, allSubcategories, isLoadingSubcategories]);
+  }, [selectedCategoryObjects, allSubcategories, isLoadingSubcategories]);
 
   useEffect(() => {
     if (initialData) {
@@ -155,14 +159,16 @@ export function ProductForm({
         console.error("Failed to parse items from initialData:", e);
       }
 
-      // Get category and subcategory names from the arrays
-      const categoryName = initialData.categories?.[0]?.name || "";
-      const subcategoryName = initialData.subcategories?.[0]?.name || "";
+      // Get category and subcategory IDs from the arrays
+      const categoryIds =
+        initialData.categories?.map((cat) => cat.id.toString()) || [];
+      const subcategoryIds =
+        initialData.subcategories?.map((sub) => sub.id.toString()) || [];
 
       form.reset({
         name: initialData.name || "",
-        category: categoryName,
-        subcategory: subcategoryName,
+        categoryIds: categoryIds,
+        subcategoryIds: subcategoryIds,
         description: initialData.description || "",
         items: parsedItems,
         expiry: initialData.expiry || undefined,
@@ -178,20 +184,22 @@ export function ProductForm({
   }, [initialData, form]);
 
   useEffect(() => {
-    if (selectedCategoryName) {
-      const currentSubcategoryName = form.getValues("subcategory");
-      if (currentSubcategoryName && currentSubcategoryName !== "") {
-        const isValidSubcategory = filteredSubcategories.some(
-          (sub) => sub.name === currentSubcategoryName
+    if (selectedCategoryIds.length > 0) {
+      const currentSubcategoryIds = form.getValues("subcategoryIds");
+      if (currentSubcategoryIds.length > 0) {
+        const validSubcategoryIds = currentSubcategoryIds.filter((subId) =>
+          filteredSubcategories.some((sub) => sub.id.toString() === subId)
         );
-        if (!isValidSubcategory) {
-          form.setValue("subcategory", "", { shouldValidate: true });
+        if (validSubcategoryIds.length !== currentSubcategoryIds.length) {
+          form.setValue("subcategoryIds", validSubcategoryIds, {
+            shouldValidate: true,
+          });
         }
       }
     } else {
-      form.setValue("subcategory", "", { shouldValidate: true });
+      form.setValue("subcategoryIds", [], { shouldValidate: true });
     }
-  }, [selectedCategoryName, filteredSubcategories, form]);
+  }, [selectedCategoryIds, filteredSubcategories, form]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -257,24 +265,12 @@ export function ProductForm({
     form.clearErrors("root.images" as any);
 
     try {
-      // Find category ID
-      const selectedCategory = categories.find(
-        (cat) => cat.name === data.category
-      );
-      const categoryIds = selectedCategory ? [selectedCategory.id] : [];
-
-      // Find subcategory ID
-      const selectedSubcategory = data.subcategory
-        ? allSubcategories.find((sub) => sub.name === data.subcategory)
-        : null;
-      const subcategoryIds = selectedSubcategory
-        ? [selectedSubcategory.id]
-        : [];
+      // Convert string IDs to numbers
+      const categoryIds = data.categoryIds.map((id) => parseInt(id, 10));
+      const subcategoryIds = data.subcategoryIds.map((id) => parseInt(id, 10));
 
       const formData = new FormData();
       formData.append("name", data.name);
-      formData.append("category", data.category);
-      formData.append("subcategory", data.subcategory); // Will be "" if none selected
       formData.append("categoryIds", JSON.stringify(categoryIds));
       formData.append("subcategoryIds", JSON.stringify(subcategoryIds));
       formData.append("description", data.description);
@@ -350,20 +346,49 @@ export function ProductForm({
                   )}
                 />
                 <FormField
-                  control={form.control as Control<ProductFormValuesInternal>}
-                  name="category"
+                  control={form.control}
+                  name="categoryIds"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Категория</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          form.setValue("subcategory", "");
-                        }}
-                        value={field.value || ""}
-                        disabled={isLoadingCategories}
-                      >
-                        <FormControl>
+                      <FormLabel>Категории</FormLabel>
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap gap-2">
+                          {field.value.map((categoryId) => {
+                            const category = categories.find(
+                              (cat) => cat.id.toString() === categoryId
+                            );
+                            return (
+                              <div
+                                key={categoryId}
+                                className="flex items-center bg-secondary px-3 py-1 rounded-md text-sm"
+                              >
+                                <span>
+                                  {category?.name || "Неизвестная категория"}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newValue = field.value.filter(
+                                      (id) => id !== categoryId
+                                    );
+                                    field.onChange(newValue);
+                                  }}
+                                  className="ml-2 text-destructive hover:text-destructive/80"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <Select
+                          onValueChange={(value) => {
+                            if (!field.value.includes(value)) {
+                              field.onChange([...field.value, value]);
+                            }
+                          }}
+                          disabled={isLoadingCategories}
+                        >
                           <SelectTrigger className="w-full">
                             <SelectValue
                               placeholder={
@@ -373,42 +398,81 @@ export function ProductForm({
                               }
                             />
                           </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map((cat: Category) => (
-                            <SelectItem key={cat.id} value={cat.name}>
-                              {cat.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                          <SelectContent>
+                            {categories
+                              .filter(
+                                (cat) =>
+                                  !field.value.includes(cat.id.toString())
+                              )
+                              .map((cat: Category) => (
+                                <SelectItem
+                                  key={cat.id}
+                                  value={cat.id.toString()}
+                                >
+                                  {cat.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
               <FormField
-                control={form.control as Control<ProductFormValuesInternal>}
-                name="subcategory"
+                control={form.control}
+                name="subcategoryIds"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Подкатегория</FormLabel>
-                    <Select
-                      onValueChange={(value) =>
-                        field.onChange(value === "--none--" ? "" : value)
-                      } // Changed
-                      value={field.value || ""}
-                      disabled={
-                        !selectedCategoryObject ||
-                        isLoadingSubcategories ||
-                        filteredSubcategories.length === 0
-                      }
-                    >
-                      <FormControl>
+                    <FormLabel>Подкатегории</FormLabel>
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2">
+                        {field.value.map((subcategoryId) => {
+                          const subcategory = allSubcategories.find(
+                            (sub) => sub.id.toString() === subcategoryId
+                          );
+                          return (
+                            <div
+                              key={subcategoryId}
+                              className="flex items-center bg-secondary px-3 py-1 rounded-md text-sm"
+                            >
+                              <span>
+                                {subcategory?.name ||
+                                  "Неизвестная подкатегория"}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newValue = field.value.filter(
+                                    (id) => id !== subcategoryId
+                                  );
+                                  field.onChange(newValue);
+                                }}
+                                className="ml-2 text-destructive hover:text-destructive/80"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <Select
+                        onValueChange={(value) => {
+                          if (!field.value.includes(value)) {
+                            field.onChange([...field.value, value]);
+                          }
+                        }}
+                        disabled={
+                          selectedCategoryObjects.length === 0 ||
+                          isLoadingSubcategories ||
+                          filteredSubcategories.length === 0
+                        }
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue
                             placeholder={
-                              !selectedCategoryObject
+                              selectedCategoryObjects.length === 0
                                 ? "Сначала выберите категорию"
                                 : isLoadingSubcategories
                                 ? "Загрузка подкатегорий..."
@@ -418,17 +482,22 @@ export function ProductForm({
                             }
                           />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="--none--">-- Нет --</SelectItem>{" "}
-                        {/* Changed */}
-                        {filteredSubcategories.map((sub) => (
-                          <SelectItem key={sub.id} value={sub.name}>
-                            {sub.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                        <SelectContent>
+                          {filteredSubcategories
+                            .filter(
+                              (sub) => !field.value.includes(sub.id.toString())
+                            )
+                            .map((sub) => (
+                              <SelectItem
+                                key={sub.id}
+                                value={sub.id.toString()}
+                              >
+                                {sub.name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
