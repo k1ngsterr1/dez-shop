@@ -81,9 +81,9 @@ export default function ProductDetailPage() {
           images={product.images}
           productName={product.name}
           isNew={isNewProduct}
-          selectedId={selectedId}
           activeImage={activeImage}
           setActiveImage={setActiveImage}
+          handleChangeId={handleChangeId}
         />
         <div className="flex flex-col justify-between">
           <ProductInfo

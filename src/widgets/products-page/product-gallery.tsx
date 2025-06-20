@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 
@@ -8,9 +8,9 @@ interface ProductGalleryProps {
   images: string[];
   productName: string;
   isNew?: boolean;
-  selectedId: number | null;
   activeImage: number;
-  setActiveImage: (index: number) => void;
+  setActiveImage: (idx: number) => void;
+  handleChangeId: (idx: number) => void;
 }
 
 export function ProductGallery({
@@ -19,12 +19,13 @@ export function ProductGallery({
   isNew,
   activeImage,
   setActiveImage,
+  handleChangeId,
 }: ProductGalleryProps) {
   return (
     <div className="space-y-4">
       <div className="relative aspect-square rounded-lg overflow-hidden border border-border">
         <Image
-          src={images[activeImage] || images[0]}
+          src={images[activeImage] ?? images[0] ?? "/placeholder.svg"}
           alt={productName}
           fill
           className="object-cover"
@@ -36,9 +37,10 @@ export function ProductGallery({
           </Badge>
         )}
       </div>
+
       {images.length > 1 && (
         <div className="grid grid-cols-4 gap-2">
-          {images.map((image, index) => (
+          {images.map((img, index) => (
             <button
               key={index}
               className={`relative aspect-square rounded-md overflow-hidden border ${
@@ -46,11 +48,14 @@ export function ProductGallery({
                   ? "border-primary ring-2 ring-primary ring-offset-2"
                   : "border-border"
               }`}
-              onClick={() => setActiveImage(index)}
+              onClick={() => {
+                setActiveImage(index);
+                handleChangeId(index);
+              }}
             >
               <Image
-                src={image || "/placeholder.svg"}
-                alt={`${productName} - изображение ${index + 1}`}
+                src={img || "/placeholder.svg"}
+                alt={`${productName} — image #${index + 1}`}
                 fill
                 className="object-cover"
               />

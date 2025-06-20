@@ -1,7 +1,7 @@
+// ProductInfo.tsx
 "use client";
 
-import type React from "react";
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -26,18 +26,11 @@ interface ProductInfoProps {
 
 const parseProductItems = (itemsJson: string): Item[] => {
   try {
-    if (!itemsJson || itemsJson === "null") {
-      return [];
-    }
+    if (!itemsJson || itemsJson === "null") return [];
     const items = JSON.parse(itemsJson);
     return Array.isArray(items) ? items : [];
   } catch (e) {
-    console.error(
-      "Failed to parse product items:",
-      e,
-      "Raw items JSON:",
-      itemsJson
-    );
+    console.error("Failed to parse product items:", e, "Raw:", itemsJson);
     return [];
   }
 };
@@ -54,18 +47,27 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   );
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
+  // 1) Whenever items OR activeImage change, clamp idx, update state & notify parent
   useEffect(() => {
     if (items.length > 0) {
-      setSelectedItem(items[activeImage] || items[0]);
+      const idx = Math.min(Math.max(activeImage, 0), items.length - 1);
+
+      if (idx !== activeImage) {
+        setActiveImage(idx);
+      }
+
+      setSelectedItem(items[idx]);
+      handleChangeId(idx);
     } else {
       setSelectedItem(null);
     }
-  }, [items, activeImage]);
+  }, [items, activeImage, handleChangeId, setActiveImage]);
 
   const handleItemChange = (id: string) => {
-    setSelectedItem(items[Number(id)]);
-    handleChangeId(Number(id));
-    setActiveImage(Number(id)); // sync image with item
+    const idx = Number(id);
+    setSelectedItem(items[idx]);
+    setActiveImage(idx);
+    handleChangeId(idx);
   };
 
   const displayItem = items.length === 1 ? items[0] : selectedItem;
@@ -73,10 +75,9 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">{product.name}</h1>
-
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          <span>{product.categories?.[0]?.name || "Без категории"}</span>
+          <span>{product.categories?.[0]?.name ?? "Без категории"}</span>
           {product.subcategories?.[0]?.name && (
             <>
               <span className="mx-1">/</span>
@@ -95,28 +96,22 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           <Badge variant="destructive">Нет в наличии</Badge>
         )}
       </div>
+
       {items.length > 1 && (
         <div className="space-y-2">
           <Label htmlFor="item-select" className="text-sm font-medium">
             Выберите объем:
           </Label>
           <Select
-            value={
-              selectedItem
-                ? String(items.findIndex((i) => i === selectedItem))
-                : ""
-            }
+            value={String(items.indexOf(selectedItem!))}
             onValueChange={handleItemChange}
           >
             <SelectTrigger id="item-select" className="w-full md:w-[200px]">
               <SelectValue placeholder="Выберите объем" />
             </SelectTrigger>
             <SelectContent>
-              {items.map((item, index) => (
-                <SelectItem
-                  key={`${item.volume}-${index}`}
-                  value={String(index)}
-                >
+              {items.map((item, i) => (
+                <SelectItem key={i} value={String(i)}>
                   {item.volume}
                 </SelectItem>
               ))}
@@ -124,6 +119,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           </Select>
         </div>
       )}
+
       {displayItem ? (
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-bold text-primary">
@@ -138,8 +134,9 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           Цена по запросу
         </div>
       )}
+
       <div
-        className="text-muted-foreground pt-4 border-t prose prose-neutral max-w-full whitespace-normal break-words overflow-wrap-anywhere"
+        className="text-muted-foreground pt-4 border-t prose prose-neutral max-w-full break-words"
         style={{ whiteSpace: "pre-line" }}
         dangerouslySetInnerHTML={{
           __html: formatDescriptionToHTML(product.description)
