@@ -119,7 +119,7 @@ export function CategoryProductsContent({ slug }: { slug: string }) {
                 <h1 className="mb-2 text-3xl font-bold">
                   {categoryName || "Категория"}
                 </h1>
-                {products && products[0]?.subcategories[0].name && (
+                {products && products[0]?.subcategories[0]?.name && (
                   <p className="mb-1 text-lg font-semibold text-primary">
                     {products[0].subcategories[0].name}
                   </p>
