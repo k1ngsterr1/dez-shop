@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,8 +13,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CheckCircle2 } from "lucide-react";
+import { sendContactForm } from "@/entities/user/api/post/form.api";
 
 export function ContactForm() {
+  const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -24,11 +30,22 @@ export function ContactForm() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    try {
+      await sendContactForm({ name, company, email, phone, subject, message });
+      setIsSubmitted(true);
+      // опционально: очистить форму
+      setName("");
+      setCompany("");
+      setEmail("");
+      setPhone("");
+      setSubject("");
+      setMessage("");
+    } catch (err) {
+      console.error("Ошибка при отправке формы", err);
+      // можно показать пользователю сообщение об ошибке
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -56,11 +73,24 @@ export function ContactForm() {
           <Label htmlFor="name">
             Имя <span className="text-destructive">*</span>
           </Label>
-          <Input id="name" placeholder="Введите ваше имя" required />
+          <Input
+            id="name"
+            name="name"
+            placeholder="Введите ваше имя"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="company">Компания</Label>
-          <Input id="company" placeholder="Название вашей компании" />
+          <Input
+            id="company"
+            name="company"
+            placeholder="Название вашей компании"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+          />
         </div>
       </div>
 
@@ -71,16 +101,26 @@ export function ContactForm() {
           </Label>
           <Input
             id="email"
+            name="email"
             type="email"
             placeholder="your@email.com"
             required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="phone">
             Телефон <span className="text-destructive">*</span>
           </Label>
-          <Input id="phone" placeholder="+7 (XXX) XXX-XX-XX" required />
+          <Input
+            id="phone"
+            name="phone"
+            placeholder="+7 (XXX) XXX-XX-XX"
+            required
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
         </div>
       </div>
 
@@ -88,16 +128,23 @@ export function ContactForm() {
         <Label htmlFor="subject">
           Тема обращения <span className="text-destructive">*</span>
         </Label>
-        <Select required>
-          <SelectTrigger id="subject">
+        <Select
+          name="subject"
+          value={subject}
+          onValueChange={setSubject}
+          required
+        >
+          <SelectTrigger>
             <SelectValue placeholder="Выберите тему обращения" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="general">Общие вопросы</SelectItem>
-            <SelectItem value="order">Заказ продукции</SelectItem>
-            <SelectItem value="partnership">Сотрудничество</SelectItem>
-            <SelectItem value="support">Техническая поддержка</SelectItem>
-            <SelectItem value="other">Другое</SelectItem>
+            <SelectItem value="Общие вопросы">Общие вопросы</SelectItem>
+            <SelectItem value="Заказ продукции">Заказ продукции</SelectItem>
+            <SelectItem value="Сотрудничество">Сотрудничество</SelectItem>
+            <SelectItem value="Техническая поддержка">
+              Техническая поддержка
+            </SelectItem>
+            <SelectItem value="Другое">Другое</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -108,11 +155,15 @@ export function ContactForm() {
         </Label>
         <Textarea
           id="message"
+          name="message"
           placeholder="Введите ваше сообщение"
           rows={5}
           required
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
         />
       </div>
+
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? "Отправка..." : "Отправить сообщение"}
       </Button>
