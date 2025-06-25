@@ -118,6 +118,14 @@ export function ContactsBlock() {
               <p>ул. Затаевича, 49</p>
             </div>
           </div>
+          <br />
+          <div className="flex items-start">
+            <MapPin className="mr-2 mt-0.5 h-4 w-4 text-primary" />
+            <div>
+              <p className="font-medium">Казахстан, г. Алматы</p>
+              <p>ул.Даулеткерея ,57б</p>
+            </div>
+          </div>
         </ContactCard>
 
         <ContactCard icon={Building} title="Реквизиты">
