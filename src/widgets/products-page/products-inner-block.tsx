@@ -62,7 +62,9 @@ export default function ProductDetailPage() {
     );
   }
 
-  const categoryLink = `/category/${encodeURIComponent(product.category)}`;
+  const categoryLink = product.categories?.[0]
+    ? `/category/${encodeURIComponent(product.categories[0].name)}`
+    : undefined;
   const subcategoryLink = product.subcategories[0]
     ? `/subcategory/${encodeURIComponent(product.subcategories[0]?.name)}`
     : undefined;

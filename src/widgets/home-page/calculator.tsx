@@ -48,11 +48,12 @@ const facilityTypes = [
 export function DisinfectantCalculator() {
   const isMobile = useIsMobile();
   const { openContactForm } = useContactFormStore();
-  const [area, setArea] = useState<number>(50);
-  const [consumptionRate, setConsumptionRate] = useState<number>(150);
-  const [cleaningFrequency, setCleaningFrequency] = useState<number>(1);
-  const [daysPerMonth, setDaysPerMonth] = useState<number>(30);
-  const [concentration, setConcentration] = useState<number>(2);
+  // Store as string for input, convert to number for calculations
+  const [area, setArea] = useState<string>("50");
+  const [consumptionRate, setConsumptionRate] = useState<string>("150");
+  const [cleaningFrequency, setCleaningFrequency] = useState<string>("1");
+  const [daysPerMonth, setDaysPerMonth] = useState<string>("30");
+  const [concentration, setConcentration] = useState<string>("2");
   const [requiredAmountMl, setRequiredAmountMl] = useState<number>(0);
   const [requiredAmountL, setRequiredAmountL] = useState<number>(0);
   const [selectedProduct, setSelectedProduct] = useState<string>("");
@@ -78,9 +79,14 @@ export function DisinfectantCalculator() {
 
   // Calculate results whenever any input changes
   useEffect(() => {
+    const areaNum = Number(area) || 0;
+    const consumptionRateNum = Number(consumptionRate) || 0;
+    const cleaningFrequencyNum = Number(cleaningFrequency) || 0;
+    const daysPerMonthNum = Number(daysPerMonth) || 0;
+    const concentrationNum = Number(concentration) || 0;
     const totalSolutionNeeded =
-      area * consumptionRate * cleaningFrequency * daysPerMonth;
-    const amountMl = totalSolutionNeeded * (concentration / 100);
+      areaNum * consumptionRateNum * cleaningFrequencyNum * daysPerMonthNum;
+    const amountMl = totalSolutionNeeded * (concentrationNum / 100);
     setRequiredAmountMl(amountMl);
     setRequiredAmountL(amountMl / 1000);
   }, [area, consumptionRate, cleaningFrequency, daysPerMonth, concentration]);
@@ -238,24 +244,47 @@ export function DisinfectantCalculator() {
                           setShowProductDropdown(true);
                         }}
                         onFocus={() => {
-                          if (productSearchTerm) setShowProductDropdown(true);
+                          setShowProductDropdown(true);
                         }}
-                        className="w-full"
+                        className="w-full pr-10"
+                        autoComplete="off"
                       />
-
+                      {productSearchTerm && (
+                        <button
+                          type="button"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+                          onClick={() => {
+                            setProductSearchTerm("");
+                            setSelectedProduct("");
+                            setShowProductDropdown(false);
+                          }}
+                          tabIndex={-1}
+                          aria-label="Очистить выбор"
+                        >
+                          ×
+                        </button>
+                      )}
                       {showProductDropdown && (
-                        <div className="absolute z-50 w-full mt-1 max-h-[200px] overflow-y-auto rounded-md border bg-background shadow-md">
+                        <div className=" w-full mt-1 max-h-[200px] overflow-y-auto rounded-md border bg-background shadow-md">
                           {productsLoading ? (
                             <div className="flex items-center justify-center p-4">
                               <Loader2 className="h-5 w-5 animate-spin text-primary mr-2" />
                               <span>Загрузка...</span>
                             </div>
-                          ) : filteredProducts.length > 0 ? (
+                          ) : filteredProducts.length > 0 ||
+                            !productSearchTerm ? (
                             <div className="py-2">
-                              {filteredProducts.map((product: any) => (
+                              {(productSearchTerm
+                                ? filteredProducts
+                                : products || []
+                              ).map((product: any) => (
                                 <div
                                   key={product.id}
-                                  className="flex items-center gap-3 px-4 py-2 hover:bg-accent cursor-pointer"
+                                  className={`flex items-center gap-3 px-4 py-2 hover:bg-accent cursor-pointer ${
+                                    selectedProduct === product.id
+                                      ? "bg-accent"
+                                      : ""
+                                  }`}
                                   onClick={() => {
                                     setSelectedProduct(product.id);
                                     setProductSearchTerm(product.name);
@@ -265,7 +294,7 @@ export function DisinfectantCalculator() {
                                   <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-md border">
                                     <Image
                                       src={
-                                        product.image ||
+                                        product.images?.[0] ||
                                         "/placeholder.svg?height=32&width=32&query=product"
                                       }
                                       alt={product.name}
@@ -279,6 +308,11 @@ export function DisinfectantCalculator() {
                                       {product.name}
                                     </p>
                                   </div>
+                                  {selectedProduct === product.id && (
+                                    <span className="text-primary font-bold ml-2">
+                                      ✓
+                                    </span>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -320,15 +354,21 @@ export function DisinfectantCalculator() {
                         min={1}
                         max={500}
                         step={1}
-                        value={[area]}
-                        onValueChange={(value) => setArea(value[0])}
+                        value={[Number(area)]}
+                        onValueChange={(value) => setArea(value[0].toString())}
                         className="py-1"
                       />
                       <Input
                         type="number"
+                        id="area"
                         value={area}
-                        onChange={(e) => setArea(Number(e.target.value))}
-                        className="mt-1 md:mt-2 h-9"
+                        onChange={(e) => setArea(e.target.value)}
+                        placeholder="Введите площадь"
+                        className="w-full"
+                        min={1}
+                        max={500}
+                        step={1}
+                        aria-label="Площадь поверхностей"
                       />
                     </div>
 
@@ -340,7 +380,7 @@ export function DisinfectantCalculator() {
                             htmlFor="consumptionRate"
                             className="text-sm md:text-base"
                           >
-                            Норма расхода на 1 м² (мл)
+                            Норма расхода (N), мл/м²
                           </Label>
                         </div>
                         <span className="text-base md:text-lg font-medium text-primary">
@@ -349,32 +389,38 @@ export function DisinfectantCalculator() {
                       </div>
                       <Slider
                         id="consumptionRate"
-                        min={50}
+                        min={1}
                         max={500}
-                        step={10}
-                        value={[consumptionRate]}
-                        onValueChange={(value) => setConsumptionRate(value[0])}
+                        step={1}
+                        value={[Number(consumptionRate)]}
+                        onValueChange={(value) =>
+                          setConsumptionRate(value[0].toString())
+                        }
                         className="py-1"
                       />
                       <Input
                         type="number"
+                        id="consumptionRate"
                         value={consumptionRate}
-                        onChange={(e) =>
-                          setConsumptionRate(Number(e.target.value))
-                        }
-                        className="mt-1 md:mt-2 h-9"
+                        onChange={(e) => setConsumptionRate(e.target.value)}
+                        placeholder="Введите норму расхода"
+                        className="w-full"
+                        min={1}
+                        max={500}
+                        step={1}
+                        aria-label="Норма расхода"
                       />
                     </div>
 
                     <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Repeat className="h-4 w-4 text-primary" />
+                          <Calendar className="h-4 w-4 text-primary" />
                           <Label
                             htmlFor="cleaningFrequency"
                             className="text-sm md:text-base"
                           >
-                            Кратность уборок в день
+                            Частота уборки (C), раз/месяц
                           </Label>
                         </div>
                         <span className="text-base md:text-lg font-medium text-primary">
@@ -384,33 +430,37 @@ export function DisinfectantCalculator() {
                       <Slider
                         id="cleaningFrequency"
                         min={1}
-                        max={10}
+                        max={30}
                         step={1}
-                        value={[cleaningFrequency]}
+                        value={[Number(cleaningFrequency)]}
                         onValueChange={(value) =>
-                          setCleaningFrequency(value[0])
+                          setCleaningFrequency(value[0].toString())
                         }
                         className="py-1"
                       />
                       <Input
                         type="number"
+                        id="cleaningFrequency"
                         value={cleaningFrequency}
-                        onChange={(e) =>
-                          setCleaningFrequency(Number(e.target.value))
-                        }
-                        className="mt-1 md:mt-2 h-9"
+                        onChange={(e) => setCleaningFrequency(e.target.value)}
+                        placeholder="Введите частоту уборки"
+                        className="w-full"
+                        min={1}
+                        max={30}
+                        step={1}
+                        aria-label="Частота уборки"
                       />
                     </div>
 
                     <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-primary" />
+                          <Repeat className="h-4 w-4 text-primary" />
                           <Label
                             htmlFor="daysPerMonth"
                             className="text-sm md:text-base"
                           >
-                            Количество дней в месяце
+                            Дней в месяце (D)
                           </Label>
                         </div>
                         <span className="text-base md:text-lg font-medium text-primary">
@@ -422,17 +472,23 @@ export function DisinfectantCalculator() {
                         min={1}
                         max={31}
                         step={1}
-                        value={[daysPerMonth]}
-                        onValueChange={(value) => setDaysPerMonth(value[0])}
+                        value={[Number(daysPerMonth)]}
+                        onValueChange={(value) =>
+                          setDaysPerMonth(value[0].toString())
+                        }
                         className="py-1"
                       />
                       <Input
                         type="number"
+                        id="daysPerMonth"
                         value={daysPerMonth}
-                        onChange={(e) =>
-                          setDaysPerMonth(Number(e.target.value))
-                        }
-                        className="mt-1 md:mt-2 h-9"
+                        onChange={(e) => setDaysPerMonth(e.target.value)}
+                        placeholder="Введите количество дней"
+                        className="w-full"
+                        min={1}
+                        max={31}
+                        step={1}
+                        aria-label="Дней в месяце"
                       />
                     </div>
 
@@ -444,148 +500,76 @@ export function DisinfectantCalculator() {
                             htmlFor="concentration"
                             className="text-sm md:text-base"
                           >
-                            Концентрация раствора (K), %
+                            Концентрация (%)
                           </Label>
                         </div>
                         <span className="text-base md:text-lg font-medium text-primary">
-                          {concentration}%
+                          {concentration}
                         </span>
                       </div>
                       <Slider
                         id="concentration"
                         min={0.1}
-                        max={10}
+                        max={100}
                         step={0.1}
-                        value={[concentration]}
-                        onValueChange={(value) => setConcentration(value[0])}
+                        value={[Number(concentration)]}
+                        onValueChange={(value) =>
+                          setConcentration(value[0].toString())
+                        }
                         className="py-1"
                       />
                       <Input
                         type="number"
+                        id="concentration"
                         value={concentration}
-                        onChange={(e) =>
-                          setConcentration(Number(e.target.value))
-                        }
-                        step="0.1"
-                        className="mt-1 md:mt-2 h-9"
+                        onChange={(e) => setConcentration(e.target.value)}
+                        placeholder="Введите концентрацию"
+                        className="w-full"
+                        min={0.1}
+                        max={100}
+                        step={0.1}
+                        aria-label="Концентрация"
                       />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="w-full mt-4 md:mt-0 border border-border/50 bg-card/90 backdrop-blur-sm shadow-lg">
-                <CardHeader className="pb-1 md:pb-2 pt-4 md:pt-6">
-                  <CardTitle className="text-lg md:text-xl text-primary">
-                    Результаты расчета
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6 md:space-y-8 py-2 md:py-4">
-                    <div className="space-y-2">
-                      <Label className="text-xs md:text-sm text-muted-foreground">
-                        Необходимое количество средства в месяц, мл
-                      </Label>
-                      <div className="flex items-end gap-2">
-                        <p className="text-2xl md:text-4xl font-bold text-primary">
-                          {Math.round(requiredAmountMl).toLocaleString("ru-RU")}
-                        </p>
-                        <span className="text-xs md:text-sm text-muted-foreground mb-1">
-                          мл
+              <Card className="w-full border border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardContent className="pt-4 md:pt-6 pb-4">
+                  <div className="space-y-3">
+                    <h3 className="text-sm md:text-base font-medium">
+                      Результаты расчета
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          Необходимое количество раствора, мл
+                        </span>
+                        <span className="text-sm font-medium text-primary">
+                          {requiredAmountMl.toFixed(0)}
                         </span>
                       </div>
-                      <div className="h-2 w-full bg-secondary rounded-full overflow-hidden mt-2">
-                        <div
-                          className="h-full bg-primary transition-all duration-500 ease-in-out"
-                          style={{
-                            width: `${Math.min(
-                              100,
-                              (requiredAmountMl / 10000) * 100
-                            )}%`,
-                          }}
-                        ></div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          Необходимое количество раствора, л
+                        </span>
+                        <span className="text-sm font-medium text-primary">
+                          {requiredAmountL.toFixed(2)}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-xs md:text-sm text-muted-foreground">
-                        Необходимое количество средства в месяц, л
-                      </Label>
-                      <div className="flex items-end gap-2">
-                        <p className="text-2xl md:text-4xl font-bold text-primary">
-                          {requiredAmountL.toLocaleString("ru-RU", {
-                            minimumFractionDigits: 1,
-                            maximumFractionDigits: 1,
-                          })}
-                        </p>
-                        <span className="text-xs md:text-sm text-muted-foreground mb-1">
-                          л
-                        </span>
-                      </div>
-                      <div className="h-2 w-full bg-secondary rounded-full overflow-hidden mt-2">
-                        <div
-                          className="h-full bg-primary transition-all duration-500 ease-in-out"
-                          style={{
-                            width: `${Math.min(
-                              100,
-                              (requiredAmountL / 10) * 100
-                            )}%`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    <div className="pt-3 md:pt-4 border-t border-border">
-                      <div className="grid grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
-                        {selectedProduct && products && (
-                          <div className="col-span-2 mb-2">
-                            <p className="text-muted-foreground">
-                              Выбранное средство
-                            </p>
-                            <p className="font-medium">
-                              {products.find(
-                                (p: any) => p.id === selectedProduct
-                              )?.name || "Не выбрано"}
-                            </p>
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-muted-foreground">Площадь</p>
-                          <p className="font-medium">{area} м²</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">
-                            Расход на 1 м²
-                          </p>
-                          <p className="font-medium">{consumptionRate} мл</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Уборок в день</p>
-                          <p className="font-medium">{cleaningFrequency}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Дней в месяце</p>
-                          <p className="font-medium">{daysPerMonth}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Концентрация</p>
-                          <p className="font-medium">{concentration}%</p>
-                        </div>
-                      </div>
-                    </div>
+                    <Button
+                      onClick={() => openContactForm()}
+                      className="w-full mt-4"
+                    >
+                      Заказать дезинфекцию
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             </div>
-          </div>
-          <div className="mt-2 md:mt-6">
-            <Button
-              className="w-full h-12 md:h-[55px] text-base md:text-lg"
-              onClick={openContactForm}
-              size={isMobile ? "default" : "lg"}
-            >
-              Заказать расчетное количество
-            </Button>
           </div>
         </div>
       </div>
