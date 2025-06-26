@@ -68,10 +68,19 @@ export function DisinfectantCalculator() {
     setShowProductDropdown(false)
   );
 
+  const allowedCategories = ["дезинфицирующие средства", "моющие средства"];
   const filteredProducts =
-    products?.filter((product: any) =>
-      product.name.toLowerCase().includes(productSearchTerm.toLowerCase())
-    ) || [];
+    products?.filter((product: any) => {
+      // Проверяем только первую категорию (основную)
+      const mainCategory =
+        (product.categories &&
+          product.categories[0]?.name?.trim().toLowerCase()) ||
+        "";
+      return (
+        allowedCategories.includes(mainCategory) &&
+        product.name.toLowerCase().includes(productSearchTerm.toLowerCase())
+      );
+    }) || [];
 
   // State for image swiper
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
@@ -137,7 +146,6 @@ export function DisinfectantCalculator() {
             Калькулятор дезинфицирующих средств
           </h2>
         </div>
-
         <div className="grid items-start gap-6">
           <div className="space-y-4 md:space-y-6">
             <p className="text-sm md:text-base text-muted-foreground">
@@ -145,7 +153,6 @@ export function DisinfectantCalculator() {
               обработки поверхностей на основе площади, нормы расхода и
               концентрации.
             </p>
-
             {/* Image Swiper */}
             <div className="relative rounded-xl h-[200px] sm:h-[300px] md:h-[450px] w-full overflow-hidden mt-4 md:mt-6 aspect-video">
               <div className="absolute inset-0 flex items-center justify-between z-20 px-2">
@@ -221,7 +228,6 @@ export function DisinfectantCalculator() {
                 ))}
               </div>
             </div>
-
             {/* Product Selector */}
             <div className="w-full mb-4 md:mb-6">
               <Card className="border border-border/50 bg-card/80 backdrop-blur-sm">
@@ -233,6 +239,15 @@ export function DisinfectantCalculator() {
                     >
                       Выберите дезинфицирующее средство
                     </Label>
+                    <div className="text-xs text-muted-foreground mb-2">
+                      Доступные категории для поиска:{" "}
+                      {allowedCategories.map((cat, i) => (
+                        <span key={cat}>
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                          {i < allowedCategories.length - 1 ? ", " : ""}
+                        </span>
+                      ))}
+                    </div>
                     <div className="relative" ref={productSearchRef}>
                       <Input
                         id="product"
@@ -271,13 +286,9 @@ export function DisinfectantCalculator() {
                               <Loader2 className="h-5 w-5 animate-spin text-primary mr-2" />
                               <span>Загрузка...</span>
                             </div>
-                          ) : filteredProducts.length > 0 ||
-                            !productSearchTerm ? (
+                          ) : filteredProducts.length > 0 ? (
                             <div className="py-2">
-                              {(productSearchTerm
-                                ? filteredProducts
-                                : products || []
-                              ).map((product: any) => (
+                              {filteredProducts.map((product: any) => (
                                 <div
                                   key={product.id}
                                   className={`flex items-center gap-3 px-4 py-2 hover:bg-accent cursor-pointer ${
@@ -328,7 +339,6 @@ export function DisinfectantCalculator() {
                 </CardContent>
               </Card>
             </div>
-
             {/* Responsive layout - stack on mobile, side by side on desktop */}
             <div className="w-full flex flex-col md:flex-row justify-between items-start gap-4">
               <Card className="w-full border border-border/50 bg-card/80 backdrop-blur-sm">
@@ -360,10 +370,9 @@ export function DisinfectantCalculator() {
                       />
                       <Input
                         type="number"
-                        id="area"
+                        placeholder="Введите площадь"
                         value={area}
                         onChange={(e) => setArea(e.target.value)}
-                        placeholder="Введите площадь"
                         className="w-full"
                         min={1}
                         max={500}
@@ -371,7 +380,7 @@ export function DisinfectantCalculator() {
                         aria-label="Площадь поверхностей"
                       />
                     </div>
-
+                    <div className="divider" />
                     <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -400,10 +409,9 @@ export function DisinfectantCalculator() {
                       />
                       <Input
                         type="number"
-                        id="consumptionRate"
+                        placeholder="Введите норму расхода"
                         value={consumptionRate}
                         onChange={(e) => setConsumptionRate(e.target.value)}
-                        placeholder="Введите норму расхода"
                         className="w-full"
                         min={1}
                         max={500}
@@ -411,7 +419,7 @@ export function DisinfectantCalculator() {
                         aria-label="Норма расхода"
                       />
                     </div>
-
+                    <div className="divider" />
                     <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -420,47 +428,7 @@ export function DisinfectantCalculator() {
                             htmlFor="cleaningFrequency"
                             className="text-sm md:text-base"
                           >
-                            Частота уборки (C), раз/месяц
-                          </Label>
-                        </div>
-                        <span className="text-base md:text-lg font-medium text-primary">
-                          {cleaningFrequency}
-                        </span>
-                      </div>
-                      <Slider
-                        id="cleaningFrequency"
-                        min={1}
-                        max={30}
-                        step={1}
-                        value={[Number(cleaningFrequency)]}
-                        onValueChange={(value) =>
-                          setCleaningFrequency(value[0].toString())
-                        }
-                        className="py-1"
-                      />
-                      <Input
-                        type="number"
-                        id="cleaningFrequency"
-                        value={cleaningFrequency}
-                        onChange={(e) => setCleaningFrequency(e.target.value)}
-                        placeholder="Введите частоту уборки"
-                        className="w-full"
-                        min={1}
-                        max={30}
-                        step={1}
-                        aria-label="Частота уборки"
-                      />
-                    </div>
-
-                    <div className="space-y-3 md:space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Repeat className="h-4 w-4 text-primary" />
-                          <Label
-                            htmlFor="daysPerMonth"
-                            className="text-sm md:text-base"
-                          >
-                            Дней в месяце (D)
+                            Частота уборки в месяц
                           </Label>
                         </div>
                         <span className="text-base md:text-lg font-medium text-primary">
@@ -468,7 +436,7 @@ export function DisinfectantCalculator() {
                         </span>
                       </div>
                       <Slider
-                        id="daysPerMonth"
+                        id="cleaningFrequency"
                         min={1}
                         max={31}
                         step={1}
@@ -480,92 +448,53 @@ export function DisinfectantCalculator() {
                       />
                       <Input
                         type="number"
-                        id="daysPerMonth"
+                        placeholder="Введите частоту уборки"
                         value={daysPerMonth}
                         onChange={(e) => setDaysPerMonth(e.target.value)}
-                        placeholder="Введите количество дней"
                         className="w-full"
                         min={1}
                         max={31}
                         step={1}
-                        aria-label="Дней в месяце"
-                      />
-                    </div>
-
-                    <div className="space-y-3 md:space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Percent className="h-4 w-4 text-primary" />
-                          <Label
-                            htmlFor="concentration"
-                            className="text-sm md:text-base"
-                          >
-                            Концентрация (%)
-                          </Label>
-                        </div>
-                        <span className="text-base md:text-lg font-medium text-primary">
-                          {concentration}
-                        </span>
-                      </div>
-                      <Slider
-                        id="concentration"
-                        min={0.1}
-                        max={100}
-                        step={0.1}
-                        value={[Number(concentration)]}
-                        onValueChange={(value) =>
-                          setConcentration(value[0].toString())
-                        }
-                        className="py-1"
-                      />
-                      <Input
-                        type="number"
-                        id="concentration"
-                        value={concentration}
-                        onChange={(e) => setConcentration(e.target.value)}
-                        placeholder="Введите концентрацию"
-                        className="w-full"
-                        min={0.1}
-                        max={100}
-                        step={0.1}
-                        aria-label="Концентрация"
+                        aria-label="Частота уборки"
                       />
                     </div>
                   </div>
                 </CardContent>
               </Card>
-
               <Card className="w-full border border-border/50 bg-card/80 backdrop-blur-sm">
                 <CardContent className="pt-4 md:pt-6 pb-4">
                   <div className="space-y-3">
-                    <h3 className="text-sm md:text-base font-medium">
-                      Результаты расчета
-                    </h3>
-                    <div className="flex flex-col gap-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          Необходимое количество раствора, мл
-                        </span>
-                        <span className="text-sm font-medium text-primary">
-                          {requiredAmountMl.toFixed(0)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          Необходимое количество раствора, л
-                        </span>
-                        <span className="text-sm font-medium text-primary">
-                          {requiredAmountL.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={() => openContactForm()}
-                      className="w-full mt-4"
+                    <Label
+                      htmlFor="concentration"
+                      className="text-sm md:text-base font-medium"
                     >
-                      Заказать дезинфекцию
-                    </Button>
+                      Концентрация раствора, %
+                    </Label>
+                    <Slider
+                      id="concentration"
+                      min={0}
+                      max={100}
+                      step={0.1}
+                      value={[Number(concentration)]}
+                      onValueChange={(value) =>
+                        setConcentration(value[0].toString())
+                      }
+                      className="py-1"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Введите концентрацию"
+                      value={concentration}
+                      onChange={(e) => setConcentration(e.target.value)}
+                      className="w-full"
+                      min={0}
+                      max={100}
+                      step={0.1}
+                      aria-label="Концентрация раствора"
+                    />
+                    <div className="text-xs text-muted-foreground">
+                      Рекомендуемая концентрация для дезинфекции: 0.5% - 5%
+                    </div>
                   </div>
                 </CardContent>
               </Card>
