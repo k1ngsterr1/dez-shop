@@ -40,9 +40,9 @@ export function Categories() {
   const sortedCategories = useMemo(() => {
     if (!categories) return [];
     const categoryOrder = [
+      "Дезинфицирующие средства",
       "Антисептические средства",
       "Моющие средства",
-      "Дезинфицирующие средства",
       "Дозирующие устройства",
     ];
     return [...categories].sort((a, b) => {
