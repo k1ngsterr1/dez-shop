@@ -499,6 +499,68 @@ export function DisinfectantCalculator() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Results Section */}
+            <Card className="w-full border border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                  <Percent className="h-5 w-5 text-primary" />
+                  Результаты расчета
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Количество средства в месяц
+                    </Label>
+                    <div className="text-2xl md:text-3xl font-bold text-primary">
+                      {requiredAmountMl.toFixed(0)} мл
+                    </div>
+                    <div className="text-lg md:text-xl font-semibold text-primary/80">
+                      {requiredAmountL.toFixed(2)} л
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Объем рабочего раствора
+                    </Label>
+                    <div className="text-xl md:text-2xl font-bold text-foreground">
+                      {(
+                        ((Number(area) || 0) *
+                          (Number(consumptionRate) || 0) *
+                          (Number(cleaningFrequency) || 0) *
+                          (Number(daysPerMonth) || 0)) /
+                        1000
+                      ).toFixed(2)}{" "}
+                      л
+                    </div>
+                  </div>
+                </div>
+
+                {selectedProduct && (
+                  <div className="mt-4 p-4 bg-accent/50 rounded-lg">
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Выбранный продукт
+                    </Label>
+                    <div className="text-base font-semibold text-foreground mt-1">
+                      {productSearchTerm}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <div>Формула расчета: S × N × Кч × Км × К/100</div>
+                    <div>
+                      где S - площадь, N - норма расхода, Кч - частота уборки,
+                      Км - дни в месяце, К - концентрация
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="mt-2 md:mt-6">
               <Button
                 className="w-full h-12 md:h-[55px] text-base md:text-lg"
