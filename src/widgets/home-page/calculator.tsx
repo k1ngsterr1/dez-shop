@@ -499,6 +499,15 @@ export function DisinfectantCalculator() {
                 </CardContent>
               </Card>
             </div>
+            <div className="mt-2 md:mt-6">
+              <Button
+                className="w-full h-12 md:h-[55px] text-base md:text-lg"
+                onClick={openContactForm}
+                size={isMobile ? "default" : "lg"}
+              >
+                Заказать расчетное количество
+              </Button>
+            </div>
           </div>
         </div>
       </div>

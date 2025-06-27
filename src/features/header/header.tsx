@@ -312,7 +312,7 @@ export function Header() {
                       </SheetHeader>
                       <div className="flex flex-col space-y-6">
                         <div className="space-y-3">
-                          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                          <h3 className="text-sm pl-4 font-medium text-muted-foreground uppercase tracking-wider">
                             Навигация
                           </h3>
                           <div className="flex flex-col space-y-1">
@@ -365,31 +365,31 @@ export function Header() {
 
                         <Separator className="bg-primary/10" />
 
-                        <div className="space-y-3 pl-2">
+                        <div className="space-y-3 pl-4">
                           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                             Связаться с нами
                           </h3>
                           <div className="flex flex-col space-y-3 rounded-xl w-[95%] bg-primary/5 p-4">
                             <a
-                              href="tel:+77272486337"
+                              href="tel:+77000246777"
                               className="group flex items-center gap-3"
                             >
                               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
                                 <Phone className="h-4 w-4 text-primary" />
                               </div>
                               <span className="group-hover:text-primary transition-colors">
-                                +7(727) 248-63-37
+                                +7 700 024 67 77
                               </span>
                             </a>
                             <a
-                              href="tel:+77272480201"
+                              href="tel:+77003234707"
                               className="group flex items-center gap-3"
                             >
                               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
                                 <Phone className="h-4 w-4 text-primary" />
                               </div>
                               <span className="group-hover:text-primary transition-colors">
-                                +7(727) 248-02-01
+                                +7 700 323 47 07
                               </span>
                             </a>
                             <a
